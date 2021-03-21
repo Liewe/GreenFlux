@@ -61,7 +61,11 @@ namespace GreenFlux.Application.Services
                 throw new DomainException(nameof(Connectors), "No valid identifier available within the charge station");
             }
 
-            var connectorDomainModel = new Domain.Models.Connector(chargeStationDomainModel, nextAvailableIdentifier.Value, connector.MaxCurrentInAmps);
+            var connectorDomainModel = new Domain.Models.Connector(chargeStationDomainModel, nextAvailableIdentifier.Value)
+            {
+                MaxCurrentInAmps = connector.MaxCurrentInAmps
+            };
+
             chargeStationDomainModel.AddConnector(connectorDomainModel);
 
             if (!_repository.SaveChargeStation(chargeStationDomainModel))

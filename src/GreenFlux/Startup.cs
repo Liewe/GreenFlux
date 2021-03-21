@@ -1,18 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GreenFlux.Application.Mappers;
 using GreenFlux.Application.Services;
 using GreenFlux.Infrastructure;
+using GreenFlux.Infrastructure.DatabaseContexts;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace GreenFlux
@@ -35,6 +30,7 @@ namespace GreenFlux
             services.AddTransient<IGroupService, GroupService>();
             services.AddTransient<IChargeStationService, ChargeStationService>();
             services.AddTransient<IConnectorService, ConnectorService>();
+            services.AddTransient<IGroupCapacityService, GroupCapacityService>();
 
             services.AddTransient<ILinksService, LinksService>();
 
@@ -44,8 +40,15 @@ namespace GreenFlux
             services.AddTransient<IChargeStationModelMapper, ChargeStationModelMapper>();
             services.AddTransient<IConnectorsModelMapper, ConnectorsModelMapper>();
             services.AddTransient<IConnectorModelMapper, ConnectorModelMapper>();
+            services.AddTransient<ISuggestionsModelMapper, SuggestionsModelMapper>();
+            services.AddTransient<ISuggestionModelMapper, SuggestionModelMapper>();
 
             services.AddSingleton<IRepository, Repository>();
+
+            services.AddTransient<IConnectionFactory, ConnectionFactory>();
+            services.AddTransient<IGroupDatabaseContext, GroupDatabaseContext>();
+            services.AddTransient<IChargeStationDatabaseContext, ChargeStationDatabaseContext>();
+            services.AddTransient<IConnectorDatabaseContext, ConnectorDatabaseContext>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -57,6 +60,8 @@ namespace GreenFlux
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.ApplicationServices.GetService<IRepository>()?.Initialize();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -16,12 +16,14 @@ namespace GreenFlux.Controllers
         private const string ConnectorTemplate = "groups/{groupIdentifier}/chargestations/{chargeStationIdentifier}/connectors/{connectorIdentifier}";
 
         private readonly IConnectorService _connectorService;
+        private readonly IGroupCapacityService _groupCapacityService;
         private readonly ILinksService _linksService;
 
-        public ConnectorController(IConnectorService connectorService, ILinksService linksService)
+        public ConnectorController(IConnectorService connectorService, ILinksService linksService, IGroupCapacityService groupCapacityService)
         {
             _connectorService = connectorService;
             _linksService = linksService;
+            _groupCapacityService = groupCapacityService;
         }
 
         [HttpGet(ConnectorsTemplate, Name = nameof(GetConnectors))]
@@ -35,6 +37,7 @@ namespace GreenFlux.Controllers
         [HttpPost(ConnectorsTemplate, Name = nameof(CreateConnector))]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Connector))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult CreateConnector(Guid groupIdentifier, Guid chargeStationIdentifier, DtoConnector connector)
         {
@@ -48,6 +51,10 @@ namespace GreenFlux.Controllers
                 var connectorModel = _connectorService.CreateConnector(groupIdentifier, chargeStationIdentifier, connector);
                 return Created(_linksService.LinkToConnector(groupIdentifier, chargeStationIdentifier, connectorModel.Identifier), connectorModel);
             }
+            catch (NotEnoughCapicityException notEnoughCapicityException)
+            {
+                return BadRequest(_groupCapacityService.GetSuggestions(groupIdentifier, notEnoughCapicityException.CapacityNeeded, 50));
+            }
             catch (DomainException domainException)
             {
                 ModelState.AddModelError(domainException.Key, domainException.Message);
@@ -58,6 +65,7 @@ namespace GreenFlux.Controllers
         [HttpPut(ConnectorTemplate, Name = nameof(UpdateConnector))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Connector))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult UpdateConnector(Guid groupIdentifier, Guid chargeStationIdentifier, short connectorIdentifier, DtoConnector connector)
@@ -70,6 +78,10 @@ namespace GreenFlux.Controllers
             try
             {
                 return Ok(_connectorService.UpdateConnector(groupIdentifier, chargeStationIdentifier, connectorIdentifier, connector));
+            }
+            catch (NotEnoughCapicityException notEnoughCapicityException)
+            {
+                return BadRequest(_groupCapacityService.GetSuggestions(groupIdentifier, notEnoughCapicityException.CapacityNeeded, 50));
             }
             catch (DomainException domainException)
             {

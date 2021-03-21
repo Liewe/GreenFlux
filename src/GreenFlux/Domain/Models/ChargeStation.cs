@@ -10,14 +10,16 @@ namespace GreenFlux.Domain.Models
         private readonly Dictionary<short, Connector> _connectors = new Dictionary<short, Connector>();
         private string _name;
 
-        public ChargeStation(Group group, Guid identifier, string name, IEnumerable<int> maxCapacitiesInAmps)
+        public ChargeStation(Group group, Guid identifier, string name)
         {
             Group = group;
             Identifier = identifier;
             Name = name;
-            
-            SetAllMaxCapacityInAmps(maxCapacitiesInAmps);
+        }
 
+        public ChargeStation(Group group, Guid identifier, string name, IEnumerable<int> maxCapacitiesInAmps) :this(group, identifier, name)
+        {
+            SetAllMaxCapacityInAmps(maxCapacitiesInAmps);
             if (_connectors.Count == Constants.MinConnectorsInChargeStation)
             {
                 throw new DomainException(nameof(Connectors), $"At least '{Constants.MinConnectorsInChargeStation}' connectors are required.");
@@ -45,6 +47,14 @@ namespace GreenFlux.Domain.Models
         
         public void SetAllMaxCapacityInAmps(IEnumerable<int> maxCapacitiesInAmps)
         {
+            var delta = maxCapacitiesInAmps.Sum() - GetUsedCapacity();
+            var availableCapacity = Group.GetAvailableCapacity();
+
+            if (availableCapacity < delta)
+            {
+                throw new NotEnoughCapicityException(nameof(Connectors), $"There is not enough capacity to set connectors to '{string.Join(", ",maxCapacitiesInAmps)}'.", delta - availableCapacity);
+            }
+
             var connectorIdentifier = Constants.MinConnectorIdentifier;
             var index = 0;
             var maxCapacitiesInAmpsArray = maxCapacitiesInAmps.ToArray();
@@ -72,7 +82,10 @@ namespace GreenFlux.Domain.Models
             }
             else if (connector == null)
             {
-                AddConnector(new Connector(this, connectorIdentifier, maxCapacityInAmps.Value));
+                AddConnector(new Connector(this, connectorIdentifier)
+                {
+                    MaxCurrentInAmps = maxCapacityInAmps.Value
+                });
             }
             else
             {
@@ -102,6 +115,11 @@ namespace GreenFlux.Domain.Models
 
         public bool RemoveConnector(short connectorIdentifier)
         {
+            if (!_connectors.ContainsKey(connectorIdentifier))
+            {
+                return false;
+            }
+
             if (_connectors.Count == Constants.MinConnectorsInChargeStation)
             {
                 throw new DomainException(nameof(Connectors), $"The connector can not be removed, the charge station has a minimum of {Constants.MinConnectorsInChargeStation} connectors.");
@@ -109,6 +127,8 @@ namespace GreenFlux.Domain.Models
 
             return _connectors.Remove(connectorIdentifier);
         }
+
+        public int GetUsedCapacity() => Connectors.Sum(c => c.MaxCurrentInAmps);
 
         public short? GetNextAvailableConnectorIdentifier()
         {

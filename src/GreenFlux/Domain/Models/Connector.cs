@@ -8,14 +8,13 @@ namespace GreenFlux.Domain.Models
         private int _maxCurrentInAmps;
         private short _identifier;
 
-        public Connector(ChargeStation chargeStation, short identifier, int maxCurrentInAmps)
+        public Connector(ChargeStation chargeStation, short identifier)
         {
             ChargeStation = chargeStation;
             Identifier = identifier;
-            MaxCurrentInAmps = maxCurrentInAmps;
         }
         
-        public ChargeStation ChargeStation { get; }
+        public ChargeStation ChargeStation { get; set;  }
 
         public int MaxCurrentInAmps
         {
@@ -27,11 +26,12 @@ namespace GreenFlux.Domain.Models
                     throw new DomainException(nameof(MaxCurrentInAmps), $"The value of {nameof(MaxCurrentInAmps)} should not be 0");
                 }
 
-                var maxCurrentIncrease = value - _maxCurrentInAmps;
+                var delta = value - _maxCurrentInAmps;
+                var availableCapacity = ChargeStation.Group.GetAvailableCapacity();
 
-                if (0 < maxCurrentIncrease && ChargeStation.Group.GetAvailableCapacity() < maxCurrentIncrease)
+                if (availableCapacity < delta)
                 {
-                    throw new DomainException(nameof(MaxCurrentInAmps), $"There is not enough capacity in the group to set {nameof(MaxCurrentInAmps)} to {value}.");
+                    throw new NotEnoughCapicityException(nameof(MaxCurrentInAmps), $"There is not enough capacity in the group to set {nameof(MaxCurrentInAmps)} to {value}.", delta - availableCapacity);
                 }
 
                 _maxCurrentInAmps = value;

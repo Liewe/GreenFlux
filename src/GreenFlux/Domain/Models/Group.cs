@@ -54,9 +54,7 @@ namespace GreenFlux.Domain.Models
             }
         }
 
-        public int GetUsedCapacity() => ChargeStations
-            .SelectMany(c => c.Connectors)
-            .Sum(c => c.MaxCurrentInAmps);
+        public int GetUsedCapacity() => ChargeStations.Sum(c => c.GetUsedCapacity());
 
         public int GetAvailableCapacity() => CapacityInAmps - GetUsedCapacity();
 

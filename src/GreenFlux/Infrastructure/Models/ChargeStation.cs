@@ -4,9 +4,9 @@ namespace GreenFlux.Infrastructure.Models
 {
     public class ChargeStation
     {
-        public Guid Identifier { get; }
+        public string Identifier { get; set; }
 
-        public Guid GroupIdentifier { get; set; }
+        public string GroupIdentifier { get; set; }
 
         public string Name { get; set; }
     }

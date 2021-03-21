@@ -4,10 +4,8 @@ using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
 using GreenFlux.Application.Models;
 using GreenFlux.Application.WriteModels;
-using GreenFlux.Domain.Models;
 using GreenFlux.Infrastructure;
 using ChargeStation = GreenFlux.Application.Models.ChargeStation;
-using Connector = GreenFlux.Domain.Models.Connector;
 
 namespace GreenFlux.Application.Services
 {
@@ -56,13 +54,9 @@ namespace GreenFlux.Application.Services
         {
             var groupDomainModel = GetGroupDomainModel(groupIdentifier);
 
-            var chargeStationDomainModel = new Domain.Models.ChargeStation(
-                groupDomainModel, 
-                Guid.NewGuid(), 
-                chargeStation.Name,
-                chargeStation.Connectors.Select(c => c.MaxCurrentInAmps));
-            
+            var chargeStationDomainModel = new Domain.Models.ChargeStation(groupDomainModel, Guid.NewGuid(), chargeStation.Name);
             groupDomainModel.AddChargeStation(chargeStationDomainModel);
+            chargeStationDomainModel.SetAllMaxCapacityInAmps(chargeStation.Connectors.Select(c => c.MaxCurrentInAmps));
 
             if (!_repository.SaveChargeStation(chargeStationDomainModel))
             {
@@ -96,7 +90,7 @@ namespace GreenFlux.Application.Services
                 throw new NotFoundException();
             }
 
-            if (!_repository.DeleteChargeStation(groupIdentifier, chargeStationIdentifier))
+            if (!_repository.DeleteChargeStation(chargeStationIdentifier))
             {
                 throw new Exception("Something went wrong trying to save group");
             }

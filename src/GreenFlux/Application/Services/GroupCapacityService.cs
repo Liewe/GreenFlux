@@ -1,27 +1,68 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using GreenFlux.Domain.Models;
+using GreenFlux.Application.Mappers;
+using GreenFlux.Application.Models;
+using GreenFlux.Infrastructure;
+using Connector = GreenFlux.Domain.Models.Connector;
+using Group = GreenFlux.Domain.Models.Group;
 
 namespace GreenFlux.Application.Services
 {
     public interface IGroupCapacityService
     {
+        Suggestions GetSuggestions(Guid groupIdentifier, int capacityNeeded, int maxResults);
     }
 
     public class GroupCapacityService : IGroupCapacityService
     {
-        public IEnumerable<IEnumerable<Connector>> FindConnectorsToFreeCapacity(Group group, int capacityNeeded, int maxResults, bool exact)
+        private readonly ISuggestionsModelMapper _suggestionsModelMapper;
+        private readonly IRepository _repository;
+
+        public GroupCapacityService(ISuggestionsModelMapper suggestionsModelMapper, IRepository repository)
+        {
+            _suggestionsModelMapper = suggestionsModelMapper;
+            _repository = repository;
+        }
+
+        public Suggestions GetSuggestions(Guid groupIdentifier, int capacityNeeded, int maxResults)
+        {
+            var group = _repository.GetGroup(groupIdentifier);
+
+            var connectorSets = FindConnectorsToFreeCapacity(group, capacityNeeded, maxResults, true).ToList();
+
+            if (connectorSets.Any())
+            {
+                return _suggestionsModelMapper.Map(connectorSets, capacityNeeded, true);
+            }
+
+            connectorSets = FindConnectorsToFreeCapacity(group, capacityNeeded, maxResults, false).ToList();
+            return _suggestionsModelMapper.Map(connectorSets, capacityNeeded, false);
+        }
+
+        private IEnumerable<IEnumerable<Connector>> FindConnectorsToFreeCapacity(Group group, int capacityNeeded, int maxResults, bool exact)
         {
             int? smallestCount = null;
-            // all connectors ordered from most capacity to least
-            return FindConnectorsToFreeCapacity(group
+
+            var connectors = group
                 .ChargeStations
-                .SelectMany(c => c.Connectors), capacityNeeded, exact)
+                .SelectMany(c => c.Connectors);
+
+            return FindConnectorsToFreeCapacity(connectors, capacityNeeded, exact)
                 .TakeWhile(c => c.Count == (smallestCount ??= c.Count))
                 .Take(maxResults); 
         }
 
-        public IEnumerable<List<Connector>> FindConnectorsToFreeCapacity(IEnumerable<Connector> connectors, int capacityNeeded, bool exact)
+        /// <summary>
+        /// Returns an iterator of all sets of connectors of which MaxCurrentInAmps sums capacityNeed, ordered on set size.
+        /// When parameter 'exact' is set to true, all sets which exactly match capacityNeeded are returned.
+        /// When parameter 'exact' is set to false, all sets that sum to at least capacityNeeded are returned for which
+        /// holds; no connector can be removed from the set without the sum of the set being lower then capacityNeeded.
+        /// </summary>
+        /// <param name="connectors">All connectors to consider</param>
+        /// <param name="capacityNeeded">The sum of MaxCurrentInAmps's we seek</param>
+        /// <param name="exact">When true, only sets which exactly match capacityNeeded are returned.</param>
+        private IEnumerable<List<Connector>> FindConnectorsToFreeCapacity(IEnumerable<Connector> connectors, int capacityNeeded, bool exact)
         {
             // all connectors ordered from most capacity to least
             var sortedConnectors = connectors.OrderByDescending(c => c.MaxCurrentInAmps).ToArray();
@@ -29,8 +70,8 @@ namespace GreenFlux.Application.Services
             // return all sets of connectors having the smallest count, ordered from smallest total capacity to biggest
             return FindCapacityRecursively(0, capacityNeeded);
 
-            // returns all sets of connectors recursively  
-            IEnumerable<List<Connector>> FindCapacityRecursively(int currentIndex, int capacityNeeded)
+            // returns all sets of connectors recursively that sum to at least 'recursiveCapacityNeeded'
+            IEnumerable<List<Connector>> FindCapacityRecursively(int currentIndex, int recursiveCapacityNeeded)
             {
                 Queue<BatchSetIterator> queue = new Queue<BatchSetIterator>();
                 int? biggestSetCount = null;
@@ -39,9 +80,9 @@ namespace GreenFlux.Application.Services
                 {
                     var currentConnector = sortedConnectors[index];
                     
-                    if (capacityNeeded <= currentConnector.MaxCurrentInAmps)
+                    if (recursiveCapacityNeeded <= currentConnector.MaxCurrentInAmps)
                     {
-                        if (capacityNeeded == currentConnector.MaxCurrentInAmps || !exact)
+                        if (recursiveCapacityNeeded == currentConnector.MaxCurrentInAmps || !exact)
                         {
                             yield return new List<Connector> { currentConnector };
                         }
@@ -50,7 +91,7 @@ namespace GreenFlux.Application.Services
                     {
                         var recursiveResults = FindCapacityRecursively(
                             index + 1,
-                            capacityNeeded - currentConnector.MaxCurrentInAmps);
+                            recursiveCapacityNeeded - currentConnector.MaxCurrentInAmps);
 
                         var item = new BatchSetIterator(currentConnector, recursiveResults);
 
@@ -88,7 +129,7 @@ namespace GreenFlux.Application.Services
             }
         }
 
-        public class BatchSetIterator
+        private class BatchSetIterator
         {
             private readonly Connector _connector;
             private readonly IEnumerator<List<Connector>> _enumerator;
@@ -123,6 +164,5 @@ namespace GreenFlux.Application.Services
                 PreviousSetSize = currentSetSize;
             }
         }
-        
     }
 }
