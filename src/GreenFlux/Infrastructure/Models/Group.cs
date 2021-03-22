@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace GreenFlux.Infrastructure.Models
+﻿namespace GreenFlux.Infrastructure.Models
 {
     public class Group
     {
-        public string Identifier { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
 

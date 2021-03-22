@@ -25,12 +25,12 @@ namespace GreenFlux.Application.Mappers
         {
             var chargeStation = new ChargeStation
             {
-                Identifier = chargeStationDomainModel.Identifier,
+                Id = chargeStationDomainModel.Id,
                 Name = chargeStationDomainModel.Name,
                 Connectors = chargeStationDomainModel.Connectors?.Select(_connectorModelMapper.Map) ?? Enumerable.Empty<Connector>()
             };
 
-            chargeStation.Links.Add(new Link(RelationShips.All, _linksService.LinkToChargeStations(chargeStationDomainModel.Group.Identifier), Method.Get));
+            chargeStation.Links.Add(new Link(RelationShips.All, _linksService.LinkToChargeStations(chargeStationDomainModel.Group.Id), Method.Get));
             chargeStation.Links.Add(new Link(RelationShips.Self, _linksService.LinkToChargeStation(chargeStationDomainModel), Method.Get));
             chargeStation.Links.Add(new Link(RelationShips.Self, _linksService.LinkToChargeStation(chargeStationDomainModel), Method.Put));
             chargeStation.Links.Add(new Link(RelationShips.Self, _linksService.LinkToChargeStation(chargeStationDomainModel), Method.Delete));

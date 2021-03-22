@@ -10,14 +10,14 @@ namespace GreenFlux.Application.Services
     public interface ILinksService
     {
         string LinkToGroups();
-        string LinkToGroup(Guid groupIdentifier);
+        string LinkToGroup(Guid groupId);
         string LinkToChargeStation(ChargeStation chargeStation);
-        string LinkToChargeStation(Guid groupIdentifier, Guid identifier);
-        string LinkToChargeStations(Guid groupIdentifier);
-        string LinkToConnectors(Connector connectorDomainModel);
-        string LinkToConnectors(ChargeStation chargeStationDomainModel);
-        string LinkToConnector(Connector connectorDomainModel);
-        string LinkToConnector(Guid groupIdentifier, Guid chargeStationIdentifier, short identifier);
+        string LinkToChargeStation(Guid groupId, Guid id);
+        string LinkToChargeStations(Guid groupId);
+        string LinkToConnectors(Connector connector);
+        string LinkToConnectors(ChargeStation chargeStation);
+        string LinkToConnector(Connector connector);
+        string LinkToConnector(Guid groupId, Guid chargeStationId, short id);
     }
 
     public class LinksService : ILinksService
@@ -32,35 +32,34 @@ namespace GreenFlux.Application.Services
         public string LinkToGroups() => 
             _urlHelper.Link(nameof(GroupController.GetGroups), new { });
 
-        public string LinkToGroup(Guid groupIdentifier) => 
-            _urlHelper.Link(nameof(GroupController.GetGroup), new { groupIdentifier });
+        public string LinkToGroup(Guid groupId) => 
+            _urlHelper.Link(nameof(GroupController.GetGroup), new { groupId });
         
-        public string LinkToChargeStations(Guid groupIdentifier) => 
-            _urlHelper.Link(nameof(ChargeStationController.GetChargeStations), new { groupIdentifier });
+        public string LinkToChargeStations(Guid groupId) => 
+            _urlHelper.Link(nameof(ChargeStationController.GetChargeStations), new { groupId });
 
         public string LinkToChargeStation(ChargeStation chargeStation) =>
-            LinkToChargeStation(chargeStation.Group.Identifier, chargeStation.Identifier);
+            LinkToChargeStation(chargeStation.Group.Id, chargeStation.Id);
         
-        public string LinkToChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier) =>
-            _urlHelper.Link(nameof(ChargeStationController.GetChargeStation), new { groupIdentifier, chargeStationIdentifier });
+        public string LinkToChargeStation(Guid groupId, Guid chargeStationId) =>
+            _urlHelper.Link(nameof(ChargeStationController.GetChargeStation), new { groupId, chargeStationId });
 
-        public string LinkToConnectors(Connector connectorDomainModel) =>
-            LinkToConnectors(connectorDomainModel.ChargeStation);
+        public string LinkToConnectors(Connector connector) =>
+            LinkToConnectors(connector.ChargeStation);
 
-        public string LinkToConnectors(ChargeStation chargeStationDomainModel) => LinkToConnectors(
-            chargeStationDomainModel.Group.Identifier,
-            chargeStationDomainModel.Identifier);
+        public string LinkToConnectors(ChargeStation chargeStation) => LinkToConnectors(
+            chargeStation.Group.Id,
+            chargeStation.Id);
 
-        public string LinkToConnectors(Guid groupIdentifier, Guid chargeStationIdentifier) =>
-            _urlHelper.Link(nameof(ConnectorController.GetConnectors), new { groupIdentifier, chargeStationIdentifier });
+        public string LinkToConnectors(Guid groupId, Guid chargeStationId) =>
+            _urlHelper.Link(nameof(ConnectorController.GetConnectors), new { groupId, chargeStationId });
 
-        public string LinkToConnector(Connector connectorDomainModel) => LinkToConnector(
-            connectorDomainModel.ChargeStation.Group.Identifier,
-            connectorDomainModel.ChargeStation.Identifier, 
-            connectorDomainModel.Identifier);
+        public string LinkToConnector(Connector connector) => LinkToConnector(
+            connector.ChargeStation.Group.Id,
+            connector.ChargeStation.Id, 
+            connector.Id);
 
-        public string LinkToConnector(Guid groupIdentifier, Guid chargeStationIdentifier, short connectorIdentifier) =>
-            _urlHelper.Link(nameof(ConnectorController.GetConnector), new { groupIdentifier, chargeStationIdentifier, connectorIdentifier });
-
+        public string LinkToConnector(Guid groupId, Guid chargeStationId, short connectorId) =>
+            _urlHelper.Link(nameof(ConnectorController.GetConnector), new { groupId, chargeStationId, connectorId });
     }
 }

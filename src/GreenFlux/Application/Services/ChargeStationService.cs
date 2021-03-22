@@ -11,15 +11,15 @@ namespace GreenFlux.Application.Services
 {
     public interface IChargeStationService
     {
-        ChargeStations GetChargeStations(Guid groupIdentifier);
+        ChargeStations GetChargeStations(Guid groupId);
 
-        ChargeStation GetChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier);
+        ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId);
 
-        ChargeStation CreateChargeStation(Guid groupIdentifier, DtoChargeStation chargeStation);
+        ChargeStation CreateChargeStation(Guid groupId, DtoChargeStation chargeStation);
 
-        ChargeStation UpdateChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier, DtoChargeStation chargeStation);
+        ChargeStation UpdateChargeStation(Guid groupId, Guid chargeStationId, DtoChargeStation chargeStation);
 
-        void DeleteChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier);
+        void DeleteChargeStation(Guid groupId, Guid chargeStationId);
     }
 
     public class ChargeStationService : IChargeStationService
@@ -38,91 +38,93 @@ namespace GreenFlux.Application.Services
             _chargeStationModelMapper = chargeStationModelMapper;
         }
 
-        public ChargeStations GetChargeStations(Guid groupIdentifier)
+        public ChargeStations GetChargeStations(Guid groupId)
         {
-            var groupDomainModel = GetGroupDomainModel(groupIdentifier);
-            return _chargeStationsModelMapper.Map(groupDomainModel);
+            var group = GetGroup(groupId);
+            return _chargeStationsModelMapper.Map(group);
         }
         
-        public ChargeStation GetChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier)
+        public ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId)
         {
-            var chargeStationDomainModel = GetChargeStationDomainModel(groupIdentifier, chargeStationIdentifier);
-            return _chargeStationModelMapper.Map(chargeStationDomainModel);
+            var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
+            return _chargeStationModelMapper.Map(chargeStation);
         }
 
-        public ChargeStation CreateChargeStation(Guid groupIdentifier, DtoChargeStation chargeStation)
+        public ChargeStation CreateChargeStation(Guid groupId, DtoChargeStation chargeStationDto)
         {
-            var groupDomainModel = GetGroupDomainModel(groupIdentifier);
+            var group = GetGroup(groupId);
 
-            var chargeStationDomainModel = new Domain.Models.ChargeStation(groupDomainModel, Guid.NewGuid(), chargeStation.Name);
-            groupDomainModel.AddChargeStation(chargeStationDomainModel);
-            chargeStationDomainModel.SetAllMaxCapacityInAmps(chargeStation.Connectors.Select(c => c.MaxCurrentInAmps));
+            var chargeStation = new Domain.Models.ChargeStation(group, Guid.NewGuid(), chargeStationDto.Name);
+            group.AddChargeStation(chargeStation);
+            chargeStation.SetAllMaxCapacityInAmps(chargeStation.Connectors.Select(c => c.MaxCurrentInAmps));
 
-            if (!_repository.SaveChargeStation(chargeStationDomainModel))
+            if (!_repository.SaveChargeStation(chargeStation))
             {
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _chargeStationModelMapper.Map(chargeStationDomainModel);
+            return _chargeStationModelMapper.Map(chargeStation);
         }
 
-        public ChargeStation UpdateChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier, DtoChargeStation chargeStation)
+        public ChargeStation UpdateChargeStation(Guid groupId, Guid chargeStationId, DtoChargeStation chargeStationDto)
         {
-            var chargeStationDomainModel = GetChargeStationDomainModel(groupIdentifier, chargeStationIdentifier);
+            var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
 
-            chargeStationDomainModel.Name = chargeStation.Name;
-            chargeStationDomainModel.SetAllMaxCapacityInAmps(chargeStation.Connectors.Select(c => c.MaxCurrentInAmps));
+            chargeStation.Name = chargeStationDto.Name;
+            chargeStation.SetAllMaxCapacityInAmps(chargeStationDto.Connectors.Select(c => c.MaxCurrentInAmps));
             
-            if (!_repository.SaveChargeStation(chargeStationDomainModel))
+            if (!_repository.SaveChargeStation(chargeStation))
             {
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _chargeStationModelMapper.Map(chargeStationDomainModel);
+            return _chargeStationModelMapper.Map(chargeStation);
         }
         
-        public void DeleteChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier)
+        public void DeleteChargeStation(Guid groupId, Guid chargeStationId)
         {
-            var chargeStationDomainModel = GetChargeStationDomainModel(groupIdentifier, chargeStationIdentifier);
+            var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
 
-            if (chargeStationDomainModel == null)
+            if (chargeStation == null)
             {
                 throw new NotFoundException();
             }
 
-            if (!_repository.DeleteChargeStation(chargeStationIdentifier))
+            chargeStation.Group.RemoveChargeStation(chargeStation);
+
+            if (!_repository.DeleteChargeStation(chargeStationId))
             {
                 throw new Exception("Something went wrong trying to save group");
             }
         }
 
-        private Domain.Models.ChargeStation GetChargeStationDomainModel(Guid groupIdentifier, Guid chargeStationIdentifier)
+        private Domain.Models.ChargeStation GetChargeStationDomainModel(Guid groupId, Guid chargeStationId)
         {
-            var groupDomainModel = GetGroupDomainModel(groupIdentifier);
+            var group = GetGroup(groupId);
 
-            var chargeStationDomainModel = groupDomainModel
+            var chargeStation = group
                 .ChargeStations
-                .FirstOrDefault(c => c.Identifier == chargeStationIdentifier);
+                .FirstOrDefault(c => c.Id == chargeStationId);
 
-            if (chargeStationDomainModel == null)
+            if (chargeStation == null)
             {
                 throw new NotFoundException();
             }
 
-            return chargeStationDomainModel;
+            return chargeStation;
 
         }
 
-        private Domain.Models.Group GetGroupDomainModel(Guid groupIdentifier)
+        private Domain.Models.Group GetGroup(Guid groupId)
         {
-            var groupDomainModel = _repository.GetGroup(groupIdentifier);
+            var group = _repository.GetGroup(groupId);
 
-            if (groupDomainModel == null)
+            if (group == null)
             {
                 throw new NotFoundException();
             }
 
-            return groupDomainModel;
+            return group;
         }
     }
 }

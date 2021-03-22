@@ -23,14 +23,14 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
             var name = "Group 1";
             var capacityInAmps = 123;
 
-            _webApplicationFactory.TestDbUtilities.AddGroup(identifier, name, capacityInAmps);
+            _webApplicationFactory.TestDbUtilities.AddGroup(id, name, capacityInAmps);
 
             //act
-            var result = await httpClient.SendAsync(HttpMethod.Delete, $"/groups/{identifier}");
+            var result = await httpClient.SendAsync(HttpMethod.Delete, $"/groups/{id}");
 
             //assert
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
@@ -42,10 +42,10 @@ namespace GreenFlux.Unittests.IntegrationTests
             //arrange
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
 
             //act
-            var result = await httpClient.SendAsync(HttpMethod.Get, $"/groups/{identifier}");
+            var result = await httpClient.SendAsync(HttpMethod.Get, $"/groups/{id}");
 
             //assert
             Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);

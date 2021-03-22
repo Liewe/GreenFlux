@@ -12,8 +12,8 @@ namespace GreenFlux.Controllers
     [ApiController]
     public class ConnectorController : ControllerBase
     {
-        private const string ConnectorsTemplate = "groups/{groupIdentifier}/chargestations/{chargeStationIdentifier}/connectors";
-        private const string ConnectorTemplate = "groups/{groupIdentifier}/chargestations/{chargeStationIdentifier}/connectors/{connectorIdentifier}";
+        private const string ConnectorsTemplate = "groups/{groupId}/chargestations/{chargeStationId}/connectors";
+        private const string ConnectorTemplate = "groups/{groupId}/chargestations/{chargeStationId}/connectors/{connectorId}";
 
         private readonly IConnectorService _connectorService;
         private readonly IGroupCapacityService _groupCapacityService;
@@ -29,9 +29,9 @@ namespace GreenFlux.Controllers
         [HttpGet(ConnectorsTemplate, Name = nameof(GetConnectors))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Connectors))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetConnectors(Guid groupIdentifier, Guid chargeStationIdentifier)
+        public IActionResult GetConnectors(Guid groupId, Guid chargeStationId)
         {
-            return Ok(_connectorService.GetConnectors(groupIdentifier, chargeStationIdentifier));
+            return Ok(_connectorService.GetConnectors(groupId, chargeStationId));
         }
 
         [HttpPost(ConnectorsTemplate, Name = nameof(CreateConnector))]
@@ -39,7 +39,7 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult CreateConnector(Guid groupIdentifier, Guid chargeStationIdentifier, DtoConnector connector)
+        public IActionResult CreateConnector(Guid groupId, Guid chargeStationId, DtoConnector connector)
         {
             if (!ModelState.IsValid)
             {
@@ -48,12 +48,12 @@ namespace GreenFlux.Controllers
 
             try
             {
-                var connectorModel = _connectorService.CreateConnector(groupIdentifier, chargeStationIdentifier, connector);
-                return Created(_linksService.LinkToConnector(groupIdentifier, chargeStationIdentifier, connectorModel.Identifier), connectorModel);
+                var connectorModel = _connectorService.CreateConnector(groupId, chargeStationId, connector);
+                return Created(_linksService.LinkToConnector(groupId, chargeStationId, connectorModel.Id), connectorModel);
             }
-            catch (NotEnoughCapicityException notEnoughCapicityException)
+            catch (NotEnoughCapacityException notEnoughCapicityException)
             {
-                return BadRequest(_groupCapacityService.GetSuggestions(groupIdentifier, notEnoughCapicityException.CapacityNeeded, 50));
+                return BadRequest(_groupCapacityService.GetSuggestions(groupId, notEnoughCapicityException.CapacityNeeded, 50));
             }
             catch (DomainException domainException)
             {
@@ -68,7 +68,7 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult UpdateConnector(Guid groupIdentifier, Guid chargeStationIdentifier, short connectorIdentifier, DtoConnector connector)
+        public IActionResult UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, DtoConnector connector)
         {
             if (!ModelState.IsValid)
             {
@@ -77,11 +77,11 @@ namespace GreenFlux.Controllers
 
             try
             {
-                return Ok(_connectorService.UpdateConnector(groupIdentifier, chargeStationIdentifier, connectorIdentifier, connector));
+                return Ok(_connectorService.UpdateConnector(groupId, chargeStationId, connectorId, connector));
             }
-            catch (NotEnoughCapicityException notEnoughCapicityException)
+            catch (NotEnoughCapacityException notEnoughCapicityException)
             {
-                return BadRequest(_groupCapacityService.GetSuggestions(groupIdentifier, notEnoughCapicityException.CapacityNeeded, 50));
+                return BadRequest(_groupCapacityService.GetSuggestions(groupId, notEnoughCapicityException.CapacityNeeded, 50));
             }
             catch (DomainException domainException)
             {
@@ -98,11 +98,11 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Connector))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetConnector(Guid groupIdentifier, Guid chargeStationIdentifier, short connectorIdentifier)
+        public IActionResult GetConnector(Guid groupId, Guid chargeStationId, short connectorId)
         {
             try
             {
-                return Ok(_connectorService.GetConnector(groupIdentifier, chargeStationIdentifier, connectorIdentifier));
+                return Ok(_connectorService.GetConnector(groupId, chargeStationId, connectorId));
             }
             catch (NotFoundException)
             {
@@ -114,11 +114,11 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult DeleteConnector(Guid groupIdentifier, Guid chargeStationIdentifier, short connectorIdentifier)
+        public IActionResult DeleteConnector(Guid groupId, Guid chargeStationId, short connectorId)
         {
             try
             {
-                _connectorService.DeleteConnector(groupIdentifier, chargeStationIdentifier, connectorIdentifier);
+                _connectorService.DeleteConnector(groupId, chargeStationId, connectorId);
                 return Ok();
             }
             catch (NotFoundException)

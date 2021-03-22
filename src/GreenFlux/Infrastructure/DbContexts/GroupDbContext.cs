@@ -2,25 +2,25 @@
 using Dapper;
 using GreenFlux.Infrastructure.Models;
 
-namespace GreenFlux.Infrastructure.DatabaseContexts
+namespace GreenFlux.Infrastructure.DbContexts
 {
-    public interface IGroupDatabaseContext
+    public interface IGroupDbContext
     {
         void Initialize();
-        Group GetByGroupIdentifier(string groupIdentifier);
+        Group GetByGroupId(string groupId);
         IEnumerable<Group> GetAll();
         int Save(Group group);
-        int DeleteByGroupIdentifier(string groupIdentifier);
+        int DeleteByGroupId(string groupId);
     }
 
-    public class GroupDatabaseContext : IGroupDatabaseContext
+    public class GroupDbContext : IGroupDbContext
     {
 
         private readonly IConnectionFactory _connectionFactory;
 
         public const string TableName = "Groups";
 
-        public GroupDatabaseContext(IConnectionFactory connectionFactory)
+        public GroupDbContext(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
         }
@@ -30,26 +30,26 @@ namespace GreenFlux.Infrastructure.DatabaseContexts
             var sql = $@"
                 CREATE TABLE IF NOT EXISTS [{TableName}] 
                 (
-                    [{nameof(Group.Identifier)}] UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
+                    [{nameof(Group.Id)}] UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
                     [{nameof(Group.Name)}] TEXT NOT NULL,
                     [{nameof(Group.CapacityInAmps)}] INTEGER NOT NULL   
                 );
 
                 CREATE UNIQUE INDEX IF NOT EXISTS [PK_{TableName}] 
-                ON {TableName}([{nameof(Group.Identifier)}]);";
+                ON {TableName}([{nameof(Group.Id)}]);";
 
             using var connection = _connectionFactory.GetDbConnection();
             connection.Execute(sql);
         }
         
-        public Group GetByGroupIdentifier(string groupIdentifier)
+        public Group GetByGroupId(string groupId)
         {
             var sql = $@"
                 SELECT * FROM [{TableName}]
-                WHERE [{nameof(Group.Identifier)}] = @{nameof(groupIdentifier)}";
+                WHERE [{nameof(Group.Id)}] = @{nameof(groupId)}";
 
             using var connection = _connectionFactory.GetDbConnection();
-            return connection.QuerySingleOrDefault<Group>(sql, new { groupIdentifier });
+            return connection.QuerySingleOrDefault<Group>(sql, new { groupId });
         }
 
         public IEnumerable<Group> GetAll()
@@ -64,14 +64,14 @@ namespace GreenFlux.Infrastructure.DatabaseContexts
         {
             var sql = $@"           
                 INSERT INTO [{TableName}](
-                    [{nameof(Group.Identifier)}],
+                    [{nameof(Group.Id)}],
                     [{nameof(Group.Name)}],
                     [{nameof(Group.CapacityInAmps)}])
                 VALUES(
-                    @{nameof(Group.Identifier)},
+                    @{nameof(Group.Id)},
                     @{nameof(Group.Name)},
                     @{nameof(Group.CapacityInAmps)})
-                ON CONFLICT([{nameof(Group.Identifier)}])
+                ON CONFLICT([{nameof(Group.Id)}])
                 DO UPDATE SET 
                     [{nameof(Group.Name)}] = @{nameof(Group.Name)},
                     [{nameof(Group.CapacityInAmps)}] = @{nameof(Group.CapacityInAmps)}";
@@ -80,14 +80,14 @@ namespace GreenFlux.Infrastructure.DatabaseContexts
             return connection.Execute(sql, group);
         }
 
-        public int DeleteByGroupIdentifier(string groupIdentifier)
+        public int DeleteByGroupId(string groupId)
         {
             var sql = $@"           
                 DELETE FROM [{TableName}]
-                WHERE [{nameof(Group.Identifier)}] = @{nameof(groupIdentifier)}";
+                WHERE [{nameof(Group.Id)}] = @{nameof(groupId)}";
 
             using var connection = _connectionFactory.GetDbConnection();
-            return connection.Execute(sql, new { groupIdentifier });
+            return connection.Execute(sql, new { groupId });
         }
     }
 }

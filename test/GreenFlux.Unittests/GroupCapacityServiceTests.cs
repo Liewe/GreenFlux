@@ -30,7 +30,7 @@ namespace GreenFlux.Unittests
             //foreach (var result in target.FindConnectorsToFreeCapacity(group, 50, 100, true))
             //{
             //    foreach(var connector in result)
-            //        _output.WriteLine($"Chargestation '{connector.ChargeStation.Name}', connector '{connector.Identifier}' (max {connector.MaxCurrentInAmps} Amps)");
+            //        _output.WriteLine($"Chargestation '{connector.ChargeStation.Name}', connector '{connector.Id}' (max {connector.MaxCurrentInAmps} Amps)");
             //    _output.WriteLine(string.Empty);
             //}
             //stopWatch.Stop();

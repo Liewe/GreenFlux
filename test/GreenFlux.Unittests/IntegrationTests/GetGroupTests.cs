@@ -25,18 +25,18 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
             var name = "Group 1";
             var capacityInAmps = 123;
             
-            _webApplicationFactory.TestDbUtilities.AddGroup(identifier, name, capacityInAmps);
+            _webApplicationFactory.TestDbUtilities.AddGroup(id, name, capacityInAmps);
 
             //act
-            var result = await httpClient.SendAsync<Group>(HttpMethod.Get, $"/groups/{identifier}");
+            var result = await httpClient.SendAsync<Group>(HttpMethod.Get, $"/groups/{id}");
 
             //assert
             Assert.Equal(HttpStatusCode.OK, result.Response.StatusCode);
-            Assert.Equal(identifier, result.Content.Identifier);
+            Assert.Equal(id, result.Content.Id);
             Assert.Equal(name, result.Content.Name);
             Assert.Equal(capacityInAmps, result.Content.CapacityInAmps);
         }
@@ -47,10 +47,10 @@ namespace GreenFlux.Unittests.IntegrationTests
             //arrange
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
 
             //act
-            var result = await httpClient.SendAsync<Group>(HttpMethod.Get, $"/groups/{identifier}");
+            var result = await httpClient.SendAsync<Group>(HttpMethod.Get, $"/groups/{id}");
 
             //assert
             Assert.Equal(HttpStatusCode.NotFound, result.Response.StatusCode);
@@ -65,10 +65,10 @@ namespace GreenFlux.Unittests.IntegrationTests
 
             var testData = Enumerable
                 .Range(1, 10)
-                .Select(i => new { Identifier = Guid.NewGuid(), Name = $"Group {i}", CapacityInAmps = i })
+                .Select(i => new { Id = Guid.NewGuid(), Name = $"Group {i}", CapacityInAmps = i })
                 .ToList();
 
-            testData.ForEach(d => _webApplicationFactory.TestDbUtilities.AddGroup(d.Identifier, d.Name, d.CapacityInAmps));
+            testData.ForEach(d => _webApplicationFactory.TestDbUtilities.AddGroup(d.Id, d.Name, d.CapacityInAmps));
 
             //act
             var result = await httpClient.SendAsync<Groups>(HttpMethod.Get, "/groups");
@@ -77,7 +77,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             Assert.Equal(HttpStatusCode.OK, result.Response.StatusCode);
             Assert.Collection(result.Content.Values, testData.Select(testDataItem => new Action<Group>(group =>
             {
-                Assert.Equal(testDataItem.Identifier, group.Identifier);
+                Assert.Equal(testDataItem.Id, group.Id);
                 Assert.Equal(testDataItem.Name, group.Name);
                 Assert.Equal(testDataItem.CapacityInAmps, group.CapacityInAmps);
             })).ToArray());

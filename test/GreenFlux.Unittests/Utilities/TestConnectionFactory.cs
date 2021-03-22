@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using GreenFlux.Infrastructure.DatabaseContexts;
+using GreenFlux.Infrastructure.DbContexts;
 using Microsoft.Data.Sqlite;
 
 namespace GreenFlux.Unittests.Utilities

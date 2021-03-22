@@ -1,17 +1,16 @@
-﻿using System;
-using GreenFlux.Domain.Exceptions;
+﻿using GreenFlux.Domain.Exceptions;
 
 namespace GreenFlux.Domain.Models
 {
     public class Connector
     {
         private int _maxCurrentInAmps;
-        private short _identifier;
+        private short _id;
 
-        public Connector(ChargeStation chargeStation, short identifier)
+        public Connector(ChargeStation chargeStation, short id)
         {
             ChargeStation = chargeStation;
-            Identifier = identifier;
+            Id = id;
         }
         
         public ChargeStation ChargeStation { get; set;  }
@@ -23,7 +22,9 @@ namespace GreenFlux.Domain.Models
             {
                 if (value == 0)
                 {
-                    throw new DomainException(nameof(MaxCurrentInAmps), $"The value of {nameof(MaxCurrentInAmps)} should not be 0");
+                    throw new DomainException(
+                        nameof(MaxCurrentInAmps), 
+                        $"The value of {nameof(MaxCurrentInAmps)} should not be 0");
                 }
 
                 var delta = value - _maxCurrentInAmps;
@@ -31,26 +32,28 @@ namespace GreenFlux.Domain.Models
 
                 if (availableCapacity < delta)
                 {
-                    throw new NotEnoughCapicityException(nameof(MaxCurrentInAmps), $"There is not enough capacity in the group to set {nameof(MaxCurrentInAmps)} to {value}.", delta - availableCapacity);
+                    throw new NotEnoughCapacityException(
+                        nameof(MaxCurrentInAmps), 
+                        $"There is not enough capacity in the group to set {nameof(MaxCurrentInAmps)} to {value}.", delta - availableCapacity);
                 }
 
                 _maxCurrentInAmps = value;
             }
         }
 
-        public short Identifier
+        public short Id
         {
-            get => _identifier;
+            get => _id;
             set
             {
-                if (value < Constants.MinConnectorIdentifier || Constants.MaxConnectorIdentifier < value)
+                if (value < Constants.MinConnectorId || Constants.MaxConnectorId < value)
                 {
                     throw new DomainException(
-                        nameof(Identifier),
-                        $"The value of {nameof(Identifier)} must be between {Constants.MinConnectorIdentifier} and {Constants.MaxConnectorIdentifier}");
+                        nameof(Id),
+                        $"The value of {nameof(Id)} must be between {Constants.MinConnectorId} and {Constants.MaxConnectorId}");
                 }
 
-                _identifier = value;
+                _id = value;
             }
         }
     }

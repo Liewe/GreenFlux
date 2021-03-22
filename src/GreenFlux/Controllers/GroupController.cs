@@ -13,7 +13,7 @@ namespace GreenFlux.Controllers
     public class GroupController : ControllerBase
     {
         private const string GroupsTemplate = "groups";
-        private const string GroupTemplate = "groups/{groupIdentifier}";
+        private const string GroupTemplate = "groups/{groupId}";
 
         private readonly IGroupService _groupService;
         private readonly ILinksService _linksService;
@@ -46,7 +46,7 @@ namespace GreenFlux.Controllers
             try
             {
                 var groupModel = _groupService.CreateGroup(group);
-                return Created(_linksService.LinkToGroup(groupModel.Identifier), groupModel);
+                return Created(_linksService.LinkToGroup(groupModel.Id), groupModel);
             }
             catch (DomainException domainException)
             {
@@ -60,7 +60,7 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult UpdateGroup(Guid groupIdentifier, DtoGroup group)
+        public IActionResult UpdateGroup(Guid groupId, DtoGroup group)
         {
             if (!ModelState.IsValid)
             {
@@ -69,7 +69,7 @@ namespace GreenFlux.Controllers
 
             try
             {
-                return Ok(_groupService.UpdateGroup(groupIdentifier, group));
+                return Ok(_groupService.UpdateGroup(groupId, group));
             }
             catch (DomainException domainException)
             {
@@ -86,11 +86,11 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetGroup(Guid groupIdentifier)
+        public IActionResult GetGroup(Guid groupId)
         {
             try
             {
-                return Ok(_groupService.GetGroup(groupIdentifier));
+                return Ok(_groupService.GetGroup(groupId));
             }
             catch (NotFoundException)
             {
@@ -102,11 +102,11 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult DeleteGroup(Guid groupIdentifier)
+        public IActionResult DeleteGroup(Guid groupId)
         {
             try
             {
-                _groupService.DeleteGroup(groupIdentifier);
+                _groupService.DeleteGroup(groupId);
                 return Ok();
             }
             catch (NotFoundException)

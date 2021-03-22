@@ -28,8 +28,8 @@ namespace GreenFlux.Application.Mappers
                 Values = groupDomainModel.ChargeStations?.Select(_chargeStationModelMapper.Map) ?? Enumerable.Empty<ChargeStation>()
             };
 
-            chargeStations.Links.Add(new Link(RelationShips.Self, _linksService.LinkToChargeStations(groupDomainModel.Identifier), Method.Post));
-            chargeStations.Links.Add(new Link(RelationShips.Group, _linksService.LinkToGroup(groupDomainModel.Identifier), Method.Get));
+            chargeStations.Links.Add(new Link(RelationShips.Self, _linksService.LinkToChargeStations(groupDomainModel.Id), Method.Post));
+            chargeStations.Links.Add(new Link(RelationShips.Group, _linksService.LinkToGroup(groupDomainModel.Id), Method.Get));
 
             return chargeStations;
         }

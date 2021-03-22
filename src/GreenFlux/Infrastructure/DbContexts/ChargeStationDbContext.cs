@@ -2,25 +2,25 @@
 using Dapper;
 using GreenFlux.Infrastructure.Models;
 
-namespace GreenFlux.Infrastructure.DatabaseContexts
+namespace GreenFlux.Infrastructure.DbContexts
 {
-    public interface IChargeStationDatabaseContext
+    public interface IChargeStationDbContext
     {
         void Initialize();
-        IEnumerable<ChargeStation> GetByGroupIdentifier(string groupIdentifier);
+        IEnumerable<ChargeStation> GetByGroupId(string groupId);
         IEnumerable<ChargeStation> GetAll();
         int Save(ChargeStation chargeStation);
-        int DeleteByChargeStationIdentifier(string chargeStationIdentifier);
-        int DeleteByGroupIdentifier(string groupIdentifier);
+        int DeleteByChargeStationId(string chargeStationId);
+        int DeleteByGroupId(string groupId);
     }
 
-    public class ChargeStationDatabaseContext : IChargeStationDatabaseContext
+    public class ChargeStationDbContext : IChargeStationDbContext
     {
         private readonly IConnectionFactory _connectionFactory;
 
         public const string TableName = "ChargeStations";
 
-        public ChargeStationDatabaseContext(IConnectionFactory connectionFactory)
+        public ChargeStationDbContext(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
         }
@@ -30,30 +30,30 @@ namespace GreenFlux.Infrastructure.DatabaseContexts
             var sql = $@"
                 CREATE TABLE IF NOT EXISTS [{TableName}] 
                 (
-                    [{nameof(ChargeStation.Identifier)}] UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
-                    [{nameof(ChargeStation.GroupIdentifier)}] UNIQUEIDENTIFIER NOT NULL,
+                    [{nameof(ChargeStation.Id)}] UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
+                    [{nameof(ChargeStation.GroupId)}] UNIQUEIDENTIFIER NOT NULL,
                     [{nameof(ChargeStation.Name)}] TEXT NOT NULL,
-                    FOREIGN KEY([{nameof(ChargeStation.GroupIdentifier)}]) REFERENCES [{GroupDatabaseContext.TableName}]([{nameof(Group.Identifier)}])
+                    FOREIGN KEY([{nameof(ChargeStation.GroupId)}]) REFERENCES [{GroupDbContext.TableName}]([{nameof(Group.Id)}])
                 );
 
-                CREATE INDEX IF NOT EXISTS [FK_{TableName}_{nameof(ChargeStation.GroupIdentifier)}] 
-                ON [{TableName}]([{nameof(ChargeStation.GroupIdentifier)}]);
+                CREATE INDEX IF NOT EXISTS [FK_{TableName}_{nameof(ChargeStation.GroupId)}] 
+                ON [{TableName}]([{nameof(ChargeStation.GroupId)}]);
 
                 CREATE UNIQUE INDEX IF NOT EXISTS [PK_{TableName}] 
-                ON [{TableName}]([{nameof(ChargeStation.Identifier)}]);";
+                ON [{TableName}]([{nameof(ChargeStation.Id)}]);";
 
             using var connection = _connectionFactory.GetDbConnection();
             connection.Execute(sql);
         }
 
-        public IEnumerable<ChargeStation> GetByGroupIdentifier(string groupIdentifier)
+        public IEnumerable<ChargeStation> GetByGroupId(string groupId)
         {
             var sql = $@"
                 SELECT * FROM [{TableName}]
-                WHERE [{nameof(ChargeStation.GroupIdentifier)}] = @{nameof(groupIdentifier)}";
+                WHERE [{nameof(ChargeStation.GroupId)}] = @{nameof(groupId)}";
 
             using var connection = _connectionFactory.GetDbConnection();
-            return connection.Query<ChargeStation>(sql, new { groupIdentifier });
+            return connection.Query<ChargeStation>(sql, new { groupId });
         }
 
         public IEnumerable<ChargeStation> GetAll()
@@ -68,14 +68,14 @@ namespace GreenFlux.Infrastructure.DatabaseContexts
         {
             var sql = $@"           
                 INSERT INTO [{TableName}](
-                    [{nameof(ChargeStation.Identifier)}],
-                    [{nameof(ChargeStation.GroupIdentifier)}],
+                    [{nameof(ChargeStation.Id)}],
+                    [{nameof(ChargeStation.GroupId)}],
                     [{nameof(ChargeStation.Name)}])
                 VALUES(
-                    @{nameof(ChargeStation.Identifier)},
-                    @{nameof(ChargeStation.GroupIdentifier)},
+                    @{nameof(ChargeStation.Id)},
+                    @{nameof(ChargeStation.GroupId)},
                     @{nameof(ChargeStation.Name)})
-                ON CONFLICT([{nameof(ChargeStation.Identifier)}])
+                ON CONFLICT([{nameof(ChargeStation.Id)}])
                 DO UPDATE SET 
                     [{nameof(ChargeStation.Name)}] = @{nameof(ChargeStation.Name)}";
 
@@ -83,24 +83,24 @@ namespace GreenFlux.Infrastructure.DatabaseContexts
             return connection.Execute(sql, chargeStation);
         }
 
-        public int DeleteByChargeStationIdentifier(string chargeStationIdentifier)
+        public int DeleteByChargeStationId(string chargeStationId)
         {
             var sql = $@"           
                 DELETE FROM [{TableName}]
-                WHERE [{nameof(ChargeStation.Identifier)}] = @{nameof(chargeStationIdentifier)}";
+                WHERE [{nameof(ChargeStation.Id)}] = @{nameof(chargeStationId)}";
 
             using var connection = _connectionFactory.GetDbConnection();
-            return connection.Execute(sql, new { chargeStationIdentifier });
+            return connection.Execute(sql, new { chargeStationId });
         }
 
-        public int DeleteByGroupIdentifier(string groupIdentifier)
+        public int DeleteByGroupId(string groupId)
         {
             var sql = $@"           
                 DELETE FROM [{TableName}]
-                WHERE [{nameof(ChargeStation.GroupIdentifier)}] = @{nameof(groupIdentifier)}";
+                WHERE [{nameof(ChargeStation.GroupId)}] = @{nameof(groupId)}";
 
             using var connection = _connectionFactory.GetDbConnection();
-            return connection.Execute(sql, new { groupIdentifier });
+            return connection.Execute(sql, new { groupId });
         }
     }
 }

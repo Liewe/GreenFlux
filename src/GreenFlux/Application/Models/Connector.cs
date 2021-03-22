@@ -2,7 +2,7 @@
 {
     public class Connector : LinkedModel
     {
-        public short Identifier { get; set; }
+        public short Id { get; set; }
 
         public int MaxCurrentInAmps { get; set; }
     }

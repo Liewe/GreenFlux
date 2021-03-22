@@ -1,8 +1,7 @@
 ﻿using System.Data;
-using System.Data.Common;
 using Microsoft.Data.Sqlite;
 
-namespace GreenFlux.Infrastructure.DatabaseContexts
+namespace GreenFlux.Infrastructure.DbContexts
 {
     public interface IConnectionFactory
     {

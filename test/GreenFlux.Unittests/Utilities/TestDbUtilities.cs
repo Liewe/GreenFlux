@@ -1,7 +1,7 @@
 ﻿using System;
 using Dapper;
 using GreenFlux.Infrastructure;
-using GreenFlux.Infrastructure.DatabaseContexts;
+using GreenFlux.Infrastructure.DbContexts;
 using GreenFlux.Infrastructure.Models;
 
 namespace GreenFlux.Unittests.Utilities
@@ -10,11 +10,11 @@ namespace GreenFlux.Unittests.Utilities
     {
         void DeleteAll();
         void DeleteAllGroups();
-        void AddGroup(Guid identifier, string name, int capacityInAmps);
+        void AddGroup(Guid id, string name, int capacityInAmps);
         void DeleteAllChargeStations();
-        void AddChargeStation(Guid identifier, Guid groupIdentifier, string name);
+        void AddChargeStation(Guid id, Guid groupId, string name);
         void DeleteAllConnectors();
-        void AddConnector(short identifier, Guid chargeStationIdentifier, Guid groupIdentifier, int maxCurrentInAmps);
+        void AddConnector(short id, Guid chargeStationId, Guid groupId, int maxCurrentInAmps);
     }
 
     public class TestDbUtilities : ITestDbUtilities
@@ -37,24 +37,24 @@ namespace GreenFlux.Unittests.Utilities
         public void DeleteAllGroups()
         {
             using var connection = _connectionFactory.GetDbConnection();
-            connection.Execute($@"DELETE FROM [{GroupDatabaseContext.TableName}]");
+            connection.Execute($@"DELETE FROM [{GroupDbContext.TableName}]");
         }
 
-        public void AddGroup(Guid identifier, string name, int capacityInAmps)
+        public void AddGroup(Guid id, string name, int capacityInAmps)
         {
             var sql = $@"           
-                INSERT INTO [{GroupDatabaseContext.TableName}](
-                    [{nameof(Group.Identifier)}],
+                INSERT INTO [{GroupDbContext.TableName}](
+                    [{nameof(Group.Id)}],
                     [{nameof(Group.Name)}],
                     [{nameof(Group.CapacityInAmps)}])
                 VALUES(
-                    @{nameof(Group.Identifier)},
+                    @{nameof(Group.Id)},
                     @{nameof(Group.Name)},
                     @{nameof(Group.CapacityInAmps)})";
 
             using var connection = _connectionFactory.GetDbConnection();
             connection.Execute(sql, new Group{
-                Identifier = identifier.ToString(),
+                Id = id.ToString(),
                 Name = name,
                 CapacityInAmps = capacityInAmps
             });
@@ -62,26 +62,26 @@ namespace GreenFlux.Unittests.Utilities
         public void DeleteAllChargeStations()
         {
             using var connection = _connectionFactory.GetDbConnection();
-            connection.Execute($@"DELETE FROM [{ChargeStationDatabaseContext.TableName}]");
+            connection.Execute($@"DELETE FROM [{ChargeStationDbContext.TableName}]");
         }
 
-        public void AddChargeStation(Guid identifier, Guid groupIdentifier, string name)
+        public void AddChargeStation(Guid id, Guid groupId, string name)
         {
             var sql = $@"           
-                INSERT INTO [{ChargeStationDatabaseContext.TableName}](
-                    [{nameof(ChargeStation.Identifier)}],
-                    [{nameof(ChargeStation.GroupIdentifier)}],
+                INSERT INTO [{ChargeStationDbContext.TableName}](
+                    [{nameof(ChargeStation.Id)}],
+                    [{nameof(ChargeStation.GroupId)}],
                     [{nameof(ChargeStation.Name)}])
                 VALUES(
-                    @{nameof(ChargeStation.Identifier)},
-                    @{nameof(ChargeStation.GroupIdentifier)},
+                    @{nameof(ChargeStation.Id)},
+                    @{nameof(ChargeStation.GroupId)},
                     @{nameof(ChargeStation.Name)})";
 
             using var connection = _connectionFactory.GetDbConnection();
             connection.Execute(sql, new ChargeStation
             {
-                Identifier = identifier.ToString(),
-                GroupIdentifier = groupIdentifier.ToString(),
+                Id = id.ToString(),
+                GroupId = groupId.ToString(),
                 Name = name
             });
         }
@@ -89,29 +89,29 @@ namespace GreenFlux.Unittests.Utilities
         public void DeleteAllConnectors()
         {
             using var connection = _connectionFactory.GetDbConnection();
-            connection.Execute($@"DELETE FROM [{ConnectorDatabaseContext.TableName}]");
+            connection.Execute($@"DELETE FROM [{ConnectorDbContext.TableName}]");
         }
 
-        public void AddConnector(short identifier, Guid chargeStationIdentifier, Guid groupIdentifier, int maxCurrentInAmps)
+        public void AddConnector(short id, Guid chargeStationId, Guid groupId, int maxCurrentInAmps)
         {
             var insertSql = $@"           
-                INSERT INTO [{ConnectorDatabaseContext.TableName}](
-                    [{nameof(Connector.Identifier)}],
-                    [{nameof(Connector.ChargeStationIdentifier)}],
-                    [{nameof(Connector.GroupIdentifier)}],
+                INSERT INTO [{ConnectorDbContext.TableName}](
+                    [{nameof(Connector.Id)}],
+                    [{nameof(Connector.ChargeStationId)}],
+                    [{nameof(Connector.GroupId)}],
                     [{nameof(Connector.MaxCurrentInAmps)}])
                 VALUES(
-                    @{nameof(Connector.Identifier)},
-                    @{nameof(Connector.ChargeStationIdentifier)},
-                    @{nameof(Connector.GroupIdentifier)},
+                    @{nameof(Connector.Id)},
+                    @{nameof(Connector.ChargeStationId)},
+                    @{nameof(Connector.GroupId)},
                     @{nameof(Connector.MaxCurrentInAmps)})";
 
             using var connection = _connectionFactory.GetDbConnection();
             connection.Execute(insertSql, new Connector
             {
-                Identifier = identifier,
-                ChargeStationIdentifier = chargeStationIdentifier.ToString(),
-                GroupIdentifier = groupIdentifier.ToString(),
+                Id = id,
+                ChargeStationId = chargeStationId.ToString(),
+                GroupId = groupId.ToString(),
                 MaxCurrentInAmps = maxCurrentInAmps
             });
         }

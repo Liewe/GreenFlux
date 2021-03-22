@@ -11,14 +11,14 @@ namespace GreenFlux.Domain.Models
         private string _name;
         private int _capacityInAmps;
 
-        public Group(Guid identifier, string name, int capacityInAmps)
+        public Group(Guid id, string name, int capacityInAmps)
         {
-            Identifier = identifier;
+            Id = id;
             Name = name;
             CapacityInAmps = capacityInAmps;
         }
       
-        public Guid Identifier { get; }
+        public Guid Id { get; }
 
         public string Name
         {
@@ -27,7 +27,9 @@ namespace GreenFlux.Domain.Models
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    throw new DomainException(nameof(Name), $"The value of {nameof(Name)} is not allowed be null or empty");
+                    throw new DomainException(
+                        nameof(Name), 
+                        $"The value of {nameof(Name)} is not allowed be null or empty");
                 }
                 _name = value;
             }
@@ -40,14 +42,18 @@ namespace GreenFlux.Domain.Models
             {
                 if (value == 0)
                 {
-                    throw new DomainException(nameof(CapacityInAmps), $"The value of {nameof(CapacityInAmps)} is not allowed to be 0");
+                    throw new DomainException(
+                        nameof(CapacityInAmps), 
+                        $"The value of {nameof(CapacityInAmps)} is not allowed to be 0");
                 }
 
                 var usedCapacity = GetUsedCapacity();
 
                 if (value < usedCapacity)
                 {
-                    throw new DomainException(nameof(CapacityInAmps), $"Cannot set capacity to {value} the sum of the capacity of the connectors is {usedCapacity}");
+                    throw new DomainException(
+                        nameof(CapacityInAmps), 
+                        $"Cannot set capacity to {value} the sum of the capacity of the connectors is {usedCapacity}");
                 }
 
                 _capacityInAmps = value;

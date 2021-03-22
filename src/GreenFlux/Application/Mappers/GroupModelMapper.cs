@@ -22,16 +22,16 @@ namespace GreenFlux.Application.Mappers
         {
             var group = new Group
             {
-                Identifier = groupDomainModel.Identifier,
+                Id = groupDomainModel.Id,
                 Name = groupDomainModel.Name,
                 CapacityInAmps = groupDomainModel.CapacityInAmps
             };
 
             group.Links.Add(new Link(RelationShips.All, _linksService.LinkToGroups(), Method.Get));
-            group.Links.Add(new Link(RelationShips.Self, _linksService.LinkToGroup(group.Identifier), Method.Get));
-            group.Links.Add(new Link(RelationShips.Self, _linksService.LinkToGroup(group.Identifier), Method.Put));
-            group.Links.Add(new Link(RelationShips.Self, _linksService.LinkToGroup(group.Identifier), Method.Delete));
-            group.Links.Add(new Link(RelationShips.ChargeStation, _linksService.LinkToChargeStations(group.Identifier), Method.Get));
+            group.Links.Add(new Link(RelationShips.Self, _linksService.LinkToGroup(group.Id), Method.Get));
+            group.Links.Add(new Link(RelationShips.Self, _linksService.LinkToGroup(group.Id), Method.Put));
+            group.Links.Add(new Link(RelationShips.Self, _linksService.LinkToGroup(group.Id), Method.Delete));
+            group.Links.Add(new Link(RelationShips.ChargeStation, _linksService.LinkToChargeStations(group.Id), Method.Get));
 
             return group;
         }

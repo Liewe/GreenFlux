@@ -1,4 +1,4 @@
-﻿using GreenFlux.Infrastructure.DatabaseContexts;
+﻿using GreenFlux.Infrastructure.DbContexts;
 using GreenFlux.Unittests.Utilities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

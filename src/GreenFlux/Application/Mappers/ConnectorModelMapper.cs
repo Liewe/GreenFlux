@@ -22,7 +22,7 @@ namespace GreenFlux.Application.Mappers
         {
             var connector = new Connector
             {
-                Identifier = connectorDomainModel.Identifier,
+                Id = connectorDomainModel.Id,
                 MaxCurrentInAmps = connectorDomainModel.MaxCurrentInAmps
             };
 

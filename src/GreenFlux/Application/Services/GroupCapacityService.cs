@@ -11,7 +11,7 @@ namespace GreenFlux.Application.Services
 {
     public interface IGroupCapacityService
     {
-        Suggestions GetSuggestions(Guid groupIdentifier, int capacityNeeded, int maxResults);
+        Suggestions GetSuggestions(Guid groupId, int capacityNeeded, int maxResults);
     }
 
     public class GroupCapacityService : IGroupCapacityService
@@ -25,9 +25,9 @@ namespace GreenFlux.Application.Services
             _repository = repository;
         }
 
-        public Suggestions GetSuggestions(Guid groupIdentifier, int capacityNeeded, int maxResults)
+        public Suggestions GetSuggestions(Guid groupId, int capacityNeeded, int maxResults)
         {
-            var group = _repository.GetGroup(groupIdentifier);
+            var group = _repository.GetGroup(groupId);
 
             var connectorSets = FindConnectorsToFreeCapacity(group, capacityNeeded, maxResults, true).ToList();
 

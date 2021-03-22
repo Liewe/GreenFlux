@@ -12,8 +12,8 @@ namespace GreenFlux.Controllers
     [ApiController]
     public class ChargeStationController : ControllerBase
     {
-        private const string ChargeStationsTemplate = "groups/{groupIdentifier}/chargestations";
-        private const string ChargeStationTemplate = "groups/{groupIdentifier}/chargestations/{chargeStationIdentifier}";
+        private const string ChargeStationsTemplate = "groups/{groupId}/chargestations";
+        private const string ChargeStationTemplate = "groups/{groupId}/chargestations/{chargeStationId}";
 
         private readonly IChargeStationService _chargeStationService;
         private readonly IGroupCapacityService _groupCapacityService;
@@ -29,9 +29,9 @@ namespace GreenFlux.Controllers
         [HttpGet(ChargeStationsTemplate, Name = nameof(GetChargeStations))]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStations))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetChargeStations(Guid groupIdentifier)
+        public IActionResult GetChargeStations(Guid groupId)
         {
-            return Ok(_chargeStationService.GetChargeStations(groupIdentifier));
+            return Ok(_chargeStationService.GetChargeStations(groupId));
         }
 
         [HttpPost(ChargeStationsTemplate, Name = nameof(CreateChargeStation))]
@@ -39,7 +39,7 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult CreateChargeStation(Guid groupIdentifier, DtoChargeStation chargeStation)
+        public IActionResult CreateChargeStation(Guid groupId, DtoChargeStation chargeStation)
         {
             if (!ModelState.IsValid)
             {
@@ -48,12 +48,12 @@ namespace GreenFlux.Controllers
 
             try
             {
-                var chargeStationModel = _chargeStationService.CreateChargeStation(groupIdentifier, chargeStation);
-                return Created(_linksService.LinkToChargeStation(groupIdentifier, chargeStationModel.Identifier), chargeStationModel);
+                var chargeStationModel = _chargeStationService.CreateChargeStation(groupId, chargeStation);
+                return Created(_linksService.LinkToChargeStation(groupId, chargeStationModel.Id), chargeStationModel);
             }
-            catch (NotEnoughCapicityException notEnoughCapicityException)
+            catch (NotEnoughCapacityException notEnoughCapicityException)
             {
-                return BadRequest(_groupCapacityService.GetSuggestions(groupIdentifier, notEnoughCapicityException.CapacityNeeded, 50));
+                return BadRequest(_groupCapacityService.GetSuggestions(groupId, notEnoughCapicityException.CapacityNeeded, 50));
             }
             catch (DomainException domainException)
             {
@@ -68,7 +68,7 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult UpdateChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier, DtoChargeStation chargeStation)
+        public IActionResult UpdateChargeStation(Guid groupId, Guid chargeStationId, DtoChargeStation chargeStation)
         {
             if (!ModelState.IsValid)
             {
@@ -77,11 +77,11 @@ namespace GreenFlux.Controllers
 
             try
             {
-                return Ok(_chargeStationService.UpdateChargeStation(groupIdentifier, chargeStationIdentifier, chargeStation));
+                return Ok(_chargeStationService.UpdateChargeStation(groupId, chargeStationId, chargeStation));
             }
-            catch (NotEnoughCapicityException notEnoughCapicityException)
+            catch (NotEnoughCapacityException notEnoughCapicityException)
             {
-                return BadRequest(_groupCapacityService.GetSuggestions(groupIdentifier, notEnoughCapicityException.CapacityNeeded, 50));
+                return BadRequest(_groupCapacityService.GetSuggestions(groupId, notEnoughCapicityException.CapacityNeeded, 50));
             }
             catch (DomainException domainException)
             {
@@ -98,11 +98,11 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStation))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier)
+        public IActionResult GetChargeStation(Guid groupId, Guid chargeStationId)
         {
             try
             {
-                return Ok(_chargeStationService.GetChargeStation(groupIdentifier, chargeStationIdentifier));
+                return Ok(_chargeStationService.GetChargeStation(groupId, chargeStationId));
             }
             catch (NotFoundException)
             {
@@ -114,11 +114,11 @@ namespace GreenFlux.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult DeleteChargeStation(Guid groupIdentifier, Guid chargeStationIdentifier)
+        public IActionResult DeleteChargeStation(Guid groupId, Guid chargeStationId)
         {
             try
             {
-                _chargeStationService.DeleteChargeStation(groupIdentifier, chargeStationIdentifier);
+                _chargeStationService.DeleteChargeStation(groupId, chargeStationId);
                 return Ok();
             }
             catch (NotFoundException)

@@ -7,7 +7,7 @@ using Microsoft.OpenApi.Models;
 using GreenFlux.Application.Mappers;
 using GreenFlux.Application.Services;
 using GreenFlux.Infrastructure;
-using GreenFlux.Infrastructure.DatabaseContexts;
+using GreenFlux.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace GreenFlux
@@ -46,9 +46,9 @@ namespace GreenFlux
             services.AddSingleton<IRepository, Repository>();
 
             services.AddTransient<IConnectionFactory, ConnectionFactory>();
-            services.AddTransient<IGroupDatabaseContext, GroupDatabaseContext>();
-            services.AddTransient<IChargeStationDatabaseContext, ChargeStationDatabaseContext>();
-            services.AddTransient<IConnectorDatabaseContext, ConnectorDatabaseContext>();
+            services.AddTransient<IGroupDbContext, GroupDbContext>();
+            services.AddTransient<IChargeStationDbContext, ChargeStationDbContext>();
+            services.AddTransient<IConnectorDbContext, ConnectorDbContext>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

@@ -25,9 +25,9 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
             
-            _webApplicationFactory.TestDbUtilities.AddGroup(identifier, "Initial name", 10);
+            _webApplicationFactory.TestDbUtilities.AddGroup(id, "Initial name", 10);
 
             var group = new DtoGroup
             {
@@ -36,7 +36,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{identifier}", group);
+            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{id}", group);
             
             // assert
             Assert.Equal(HttpStatusCode.OK, result.Response.StatusCode);
@@ -51,9 +51,9 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
 
-            _webApplicationFactory.TestDbUtilities.AddGroup(identifier, "Initial name", 10);
+            _webApplicationFactory.TestDbUtilities.AddGroup(id, "Initial name", 10);
 
             var group = new DtoGroup
             {
@@ -62,7 +62,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{identifier}", group);
+            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{id}", group);
 
             // assert
             Assert.Equal(HttpStatusCode.BadRequest, result.Response.StatusCode);
@@ -75,7 +75,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var identifier = Guid.NewGuid();
+            var id = Guid.NewGuid();
             
             var group = new DtoGroup
             {
@@ -84,7 +84,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{identifier}", group);
+            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{id}", group);
 
             // assert
             Assert.Equal(HttpStatusCode.NotFound, result.Response.StatusCode);
