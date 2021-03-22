@@ -21,20 +21,20 @@ namespace GreenFlux.Unittests
         [Fact]
         public void TestPerformance()
         {
-            GroupCapacityService target = new GroupCapacityService();
+            //GroupCapacityService target = new GroupCapacityService();
 
-            var group = CreateDummy(1000000, 1, 25);
+            //var group = CreateDummy(1000000, 1, 25);
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            foreach (var result in target.FindConnectorsToFreeCapacity(group, 50, 100, true))
-            {
-                foreach(var connector in result)
-                    _output.WriteLine($"Chargestation '{connector.ChargeStation.Name}', connector '{connector.Identifier}' (max {connector.MaxCurrentInAmps} Amps)");
-                _output.WriteLine(string.Empty);
-            }
-            stopWatch.Stop();
-            _output.WriteLine($"{stopWatch.ElapsedMilliseconds}ms");
+            //var stopWatch = new Stopwatch();
+            //stopWatch.Start();
+            //foreach (var result in target.FindConnectorsToFreeCapacity(group, 50, 100, true))
+            //{
+            //    foreach(var connector in result)
+            //        _output.WriteLine($"Chargestation '{connector.ChargeStation.Name}', connector '{connector.Identifier}' (max {connector.MaxCurrentInAmps} Amps)");
+            //    _output.WriteLine(string.Empty);
+            //}
+            //stopWatch.Stop();
+            //_output.WriteLine($"{stopWatch.ElapsedMilliseconds}ms");
         }
 
         public Group CreateDummy(int connectorCount, int minAmps, int maxAmps)

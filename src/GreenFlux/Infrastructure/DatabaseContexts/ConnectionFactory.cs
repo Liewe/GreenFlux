@@ -1,16 +1,17 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
 using Microsoft.Data.Sqlite;
 
 namespace GreenFlux.Infrastructure.DatabaseContexts
 {
     public interface IConnectionFactory
     {
-        DbConnection GetDbConnection();
+        IDbConnection GetDbConnection();
     }
 
     public class ConnectionFactory : IConnectionFactory
     {
-        public DbConnection GetDbConnection()
+        public IDbConnection GetDbConnection()
         {
             return new SqliteConnection("Data Source=GreenFlux.db");
         }

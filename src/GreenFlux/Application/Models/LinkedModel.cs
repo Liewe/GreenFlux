@@ -4,6 +4,6 @@ namespace GreenFlux.Application.Models
 {
     public class LinkedModel
     {
-        public List<Link> Links { get; } = new List<Link>();
+        public List<Link> Links { get; set; } = new List<Link>();
     }
 }
