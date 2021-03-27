@@ -2,7 +2,12 @@
 
 namespace GreenFlux.Application.Models
 {
-    public class ConnectorWrapper
+    public interface IValue
+    {
+        public int Value { get; }
+    }
+
+    public class ConnectorWrapper : IValue
     {
         public ConnectorWrapper(ChargeStation chargeStation, short connectorId, int maxCapactiry)
         {
@@ -15,10 +20,9 @@ namespace GreenFlux.Application.Models
         public short ConnectorId { get; }
         public int MaxCurrentInAmps { get; }
 
-        public void Deconstruct(out ChargeStation chargeStation, out short connectorId)
+        public int Value
         {
-            chargeStation = ChargeStation;
-            connectorId = ConnectorId;
+            get => MaxCurrentInAmps;
         }
     }
 }

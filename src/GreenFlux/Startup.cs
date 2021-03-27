@@ -31,6 +31,7 @@ namespace GreenFlux
             services.AddTransient<IChargeStationService, ChargeStationService>();
             services.AddTransient<IConnectorService, ConnectorService>();
             services.AddTransient<IGroupCapacityService, GroupCapacityService>();
+            services.AddTransient<ISetService, SetService>();
 
             services.AddTransient<ILinksService, LinksService>();
 
