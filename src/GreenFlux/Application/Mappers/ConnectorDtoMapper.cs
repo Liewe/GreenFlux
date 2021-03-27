@@ -21,7 +21,7 @@ namespace GreenFlux.Application.Mappers
 
         public ConnectorDto Map(ChargeStation chargeStation, short connectorId)
         {
-            var maxCapacityInAmps = chargeStation.GetMaxCapacityInAmps(connectorId);
+            var maxCapacityInAmps = chargeStation.GetCapacity(connectorId);
 
             if (maxCapacityInAmps == null)
             {

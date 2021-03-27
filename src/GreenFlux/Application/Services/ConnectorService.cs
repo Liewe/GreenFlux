@@ -43,7 +43,7 @@ namespace GreenFlux.Application.Services
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
 
-            if (chargeStation.GetMaxCapacityInAmps(connectorId) == null)
+            if (chargeStation.GetCapacity(connectorId) == null)
             {
                 throw new NotFoundException();
             }
@@ -70,7 +70,7 @@ namespace GreenFlux.Application.Services
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
 
-            if (chargeStation.GetMaxCapacityInAmps(connectorId) == null)
+            if (chargeStation.GetCapacity(connectorId) == null)
             {
                 throw new NotFoundException();
             }

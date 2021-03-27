@@ -73,13 +73,13 @@ namespace GreenFlux.Unittests.UnitTests.Application.Services.ConnectorService
         {
             //arrange
             var saveConnectorDto = new SaveConnectorDto { MaxCurrentInAmps = 5 };
-            _repository.Setup(m => m.SaveChargeStation(It.Is<ChargeStation>(c => c.GetMaxCapacityInAmps(_connectorId) == 5))).Returns(true);
+            _repository.Setup(m => m.SaveChargeStation(It.Is<ChargeStation>(c => c.GetCapacity(_connectorId) == 5))).Returns(true);
 
             //act
             _target.UpdateConnector(_groupId, _chargeStationId, _connectorId, saveConnectorDto);
 
             //assert
-            _repository.Verify(m => m.SaveChargeStation(It.Is<ChargeStation>(c => c.GetMaxCapacityInAmps(_connectorId) == 5)), Times.Once);
+            _repository.Verify(m => m.SaveChargeStation(It.Is<ChargeStation>(c => c.GetCapacity(_connectorId) == 5)), Times.Once);
         }
 
         [Fact]

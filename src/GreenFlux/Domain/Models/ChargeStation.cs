@@ -21,8 +21,7 @@ namespace GreenFlux.Domain.Models
         {
             SetAllConnectorCapacities(connectorCapacities);
         }
-
-
+        
         public ChargeStation(Group group, Guid id, string name, IReadOnlyDictionary<short, int> connectorCapacities) :this(group, id, name)
         {
             SetAllConnectorCapacities(connectorCapacities);
@@ -124,7 +123,7 @@ namespace GreenFlux.Domain.Models
             return nextAvailableId.Value;
         }
 
-        public int? GetMaxCapacityInAmps(short connectorId)
+        public int? GetCapacity(short connectorId)
         {
             return GetConnector(connectorId)?.MaxCurrentInAmps;
         }
@@ -144,7 +143,9 @@ namespace GreenFlux.Domain.Models
             return _connectors.Remove(connectorId);
         }
 
-        public short? GetNextAvailableConnectorId()
+        public int GetUsedCapacity() => _connectors.Values.Sum(c => c.MaxCurrentInAmps);
+
+        private short? GetNextAvailableConnectorId()
         {
             for (short i = Constants.MinConnectorId; i <= Constants.MaxConnectorId; i++)
             {
@@ -156,9 +157,7 @@ namespace GreenFlux.Domain.Models
 
             return null;
         }
-
-        public int GetUsedCapacity() => _connectors.Values.Sum(c => c.MaxCurrentInAmps);
-
+        
         private Connector GetConnector(short connectorId)
         {
             return _connectors.TryGetValue(connectorId, out Connector connector) ? connector : null;
