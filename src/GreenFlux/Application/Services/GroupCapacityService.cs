@@ -4,9 +4,8 @@ using System.Linq;
 using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Mappers;
 using GreenFlux.Application.Models;
+using GreenFlux.Domain.Models;
 using GreenFlux.Infrastructure;
-using ChargeStation = GreenFlux.Domain.Models.ChargeStation;
-using Group = GreenFlux.Domain.Models.Group;
 
 namespace GreenFlux.Application.Services
 {
@@ -17,12 +16,12 @@ namespace GreenFlux.Application.Services
 
     public class GroupCapacityService : IGroupCapacityService
     {
-        private readonly ISuggestionsDtoMapper _suggestionsModelMapper;
+        private readonly ISuggestionsDtoMapper _suggestionsDtoMapper;
         private readonly IRepository _repository;
 
-        public GroupCapacityService(ISuggestionsDtoMapper suggestionsModelMapper, IRepository repository)
+        public GroupCapacityService(ISuggestionsDtoMapper suggestionsDtoMapper, IRepository repository)
         {
-            _suggestionsModelMapper = suggestionsModelMapper;
+            _suggestionsDtoMapper = suggestionsDtoMapper;
             _repository = repository;
         }
 
@@ -34,11 +33,11 @@ namespace GreenFlux.Application.Services
 
             if (connectorSets.Any())
             {
-                return _suggestionsModelMapper.Map(connectorSets, capacityNeeded, true);
+                return _suggestionsDtoMapper.Map(connectorSets, capacityNeeded, true);
             }
 
             connectorSets = FindConnectorsToFreeCapacity(group, capacityNeeded, maxResults, false).ToList();
-            return _suggestionsModelMapper.Map(connectorSets, capacityNeeded, false);
+            return _suggestionsDtoMapper.Map(connectorSets, capacityNeeded, false);
         }
 
         private IEnumerable<IEnumerable<ConnectorWrapper>> FindConnectorsToFreeCapacity(Group group, int capacityNeeded, int maxResults, bool exact)

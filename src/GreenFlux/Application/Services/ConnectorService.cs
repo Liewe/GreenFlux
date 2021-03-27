@@ -3,7 +3,7 @@ using System.Linq;
 using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
-using GreenFlux.Domain.Exceptions;
+using GreenFlux.Domain.Models;
 using GreenFlux.Infrastructure;
 
 namespace GreenFlux.Application.Services
@@ -20,35 +20,35 @@ namespace GreenFlux.Application.Services
     public class ConnectorService : IConnectorService
     {
         private readonly IRepository _repository;
-        private readonly IConnectorsDtoMapper _connectorsModelMapper;
-        private readonly IConnectorDtoMapper _connectorModelMapper;
+        private readonly IConnectorsDtoMapper _connectorsDtoMapper;
+        private readonly IConnectorDtoMapper _connectorDtoMapper;
 
         public ConnectorService(
             IRepository repository, 
-            IConnectorsDtoMapper connectorsModelMapper, 
-            IConnectorDtoMapper connectorModelMapper)
+            IConnectorsDtoMapper connectorsDtoMapper, 
+            IConnectorDtoMapper connectorDtoMapper)
         {
             _repository = repository;
-            _connectorsModelMapper = connectorsModelMapper;
-            _connectorModelMapper = connectorModelMapper;
+            _connectorsDtoMapper = connectorsDtoMapper;
+            _connectorDtoMapper = connectorDtoMapper;
         }
 
         public ConnectorsDto GetConnectors(Guid groupId, Guid chargeStationId)
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
-            return _connectorsModelMapper.Map(chargeStation);
+            return _connectorsDtoMapper.Map(chargeStation);
         }
         
         public ConnectorDto GetConnector(Guid groupId, Guid chargeStationId, short connectorId)
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
-            var result = _connectorModelMapper.Map(chargeStation, connectorId);
-            if (result == null)
+            var connectorDto = _connectorDtoMapper.Map(chargeStation, connectorId);
+            if (connectorDto == null)
             {
                 throw new NotFoundException();
             }
 
-            return result;
+            return connectorDto;
         }
 
         public ConnectorDto CreateConnector(Guid groupId, Guid chargeStationId, SaveConnectorDto connectorDto)
@@ -62,7 +62,7 @@ namespace GreenFlux.Application.Services
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _connectorModelMapper.Map(chargeStation, connectorId);
+            return _connectorDtoMapper.Map(chargeStation, connectorId);
         }
 
         public ConnectorDto UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, SaveConnectorDto connectorDto)
@@ -81,7 +81,7 @@ namespace GreenFlux.Application.Services
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _connectorModelMapper.Map(chargeStation, connectorId);
+            return _connectorDtoMapper.Map(chargeStation, connectorId);
         }
 
         public void DeleteConnector(Guid groupId, Guid chargeStationId, short connectorId)
@@ -99,7 +99,7 @@ namespace GreenFlux.Application.Services
             }
         }
         
-        private Domain.Models.ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId)
+        private ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId)
         {
             var group = GetGroup(groupId);
 
@@ -116,7 +116,7 @@ namespace GreenFlux.Application.Services
 
         }
 
-        private Domain.Models.Group GetGroup(Guid groupId)
+        private Group GetGroup(Guid groupId)
         {
             var group = _repository.GetGroup(groupId);
 

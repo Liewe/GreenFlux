@@ -3,8 +3,8 @@ using System.Linq;
 using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
+using GreenFlux.Domain.Models;
 using GreenFlux.Infrastructure;
-using ChargeStationDto = GreenFlux.Application.DtoModels.ChargeStationDto;
 
 namespace GreenFlux.Application.Services
 {
@@ -20,29 +20,29 @@ namespace GreenFlux.Application.Services
     public class ChargeStationService : IChargeStationService
     {
         private readonly IRepository _repository;
-        private readonly IChargeStationsDtoMapper _chargeStationsModelMapper;
-        private readonly IChargeStationDtoMapper _chargeStationModelMapper;
+        private readonly IChargeStationsDtoMapper _chargeStationsDtoMapper;
+        private readonly IChargeStationDtoMapper _chargeStationDtoMapper;
 
         public ChargeStationService(
             IRepository repository, 
-            IChargeStationsDtoMapper chargeStationsModelMapper, 
-            IChargeStationDtoMapper chargeStationModelMapper)
+            IChargeStationsDtoMapper chargeStationsDtoMapper, 
+            IChargeStationDtoMapper chargeStationDtoMapper)
         {
             _repository = repository;
-            _chargeStationsModelMapper = chargeStationsModelMapper;
-            _chargeStationModelMapper = chargeStationModelMapper;
+            _chargeStationsDtoMapper = chargeStationsDtoMapper;
+            _chargeStationDtoMapper = chargeStationDtoMapper;
         }
 
         public ChargeStationsDto GetChargeStations(Guid groupId)
         {
             var group = GetGroup(groupId);
-            return _chargeStationsModelMapper.Map(group);
+            return _chargeStationsDtoMapper.Map(group);
         }
         
         public ChargeStationDto GetChargeStation(Guid groupId, Guid chargeStationId)
         {
             var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
-            return _chargeStationModelMapper.Map(chargeStation);
+            return _chargeStationDtoMapper.Map(chargeStation);
         }
 
         public ChargeStationDto CreateChargeStation(Guid groupId, SaveChargeStationDto chargeStationDto)
@@ -50,7 +50,7 @@ namespace GreenFlux.Application.Services
             var group = GetGroup(groupId);
 
             var connectionCapacities = chargeStationDto.Connectors.Select(c => c.MaxCurrentInAmps);
-            var chargeStation = new Domain.Models.ChargeStation(group, Guid.NewGuid(), chargeStationDto.Name, connectionCapacities);
+            var chargeStation = new ChargeStation(group, Guid.NewGuid(), chargeStationDto.Name, connectionCapacities);
             group.AddChargeStation(chargeStation);
 
             if (!_repository.SaveChargeStation(chargeStation))
@@ -58,7 +58,7 @@ namespace GreenFlux.Application.Services
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _chargeStationModelMapper.Map(chargeStation);
+            return _chargeStationDtoMapper.Map(chargeStation);
         }
 
         public ChargeStationDto UpdateChargeStation(Guid groupId, Guid chargeStationId, SaveChargeStationDto chargeStationDto)
@@ -73,7 +73,7 @@ namespace GreenFlux.Application.Services
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _chargeStationModelMapper.Map(chargeStation);
+            return _chargeStationDtoMapper.Map(chargeStation);
         }
         
         public void DeleteChargeStation(Guid groupId, Guid chargeStationId)
@@ -91,7 +91,7 @@ namespace GreenFlux.Application.Services
             }
         }
 
-        private Domain.Models.ChargeStation GetChargeStationDomainModel(Guid groupId, Guid chargeStationId)
+        private ChargeStation GetChargeStationDomainModel(Guid groupId, Guid chargeStationId)
         {
             var group = GetGroup(groupId);
 
@@ -108,7 +108,7 @@ namespace GreenFlux.Application.Services
 
         }
 
-        private Domain.Models.Group GetGroup(Guid groupId)
+        private Group GetGroup(Guid groupId)
         {
             var group = _repository.GetGroup(groupId);
 

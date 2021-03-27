@@ -2,6 +2,7 @@
 using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
+using GreenFlux.Domain.Models;
 using GreenFlux.Infrastructure;
 
 namespace GreenFlux.Application.Services
@@ -22,23 +23,23 @@ namespace GreenFlux.Application.Services
     public class GroupService : IGroupService
     {
         private readonly IRepository _repository;
-        private readonly IGroupsDtoMapper _groupsModelMapper;
-        private readonly IGroupDtoMapper _groupModelMapper;
+        private readonly IGroupsDtoMapper _groupsDtoMapper;
+        private readonly IGroupDtoMapper _groupDtoMapper;
 
         public GroupService(
             IRepository repository, 
-            IGroupsDtoMapper groupsModelMapper, 
-            IGroupDtoMapper groupModelMapper)
+            IGroupsDtoMapper groupsDtoMapper, 
+            IGroupDtoMapper groupDtoMapper)
         {
             _repository = repository;
-            _groupsModelMapper = groupsModelMapper;
-            _groupModelMapper = groupModelMapper;
+            _groupsDtoMapper = groupsDtoMapper;
+            _groupDtoMapper = groupDtoMapper;
         }
 
         public GroupsDto GetGroups()
         {
             var groupsDomainModel = _repository.GetGroups();
-            return _groupsModelMapper.Map(groupsDomainModel);
+            return _groupsDtoMapper.Map(groupsDomainModel);
         }
 
         public GroupDto GetGroup(Guid groupId)
@@ -50,19 +51,19 @@ namespace GreenFlux.Application.Services
                 throw new NotFoundException();
             }
 
-            return _groupModelMapper.Map(group);
+            return _groupDtoMapper.Map(group);
         }
 
         public GroupDto CreateGroup(SaveGroupDto groupDto)
         {
-            var group = new Domain.Models.Group(Guid.NewGuid(), groupDto.Name, groupDto.CapacityInAmps);
+            var group = new Group(Guid.NewGuid(), groupDto.Name, groupDto.CapacityInAmps);
 
             if (!_repository.SaveGroup(group))
             {
                 throw new Exception("Something went wrong trying to save group");
             }
 
-            return _groupModelMapper.Map(group);
+            return _groupDtoMapper.Map(group);
         }
 
         public GroupDto UpdateGroup(Guid groupId, SaveGroupDto groupDto)
@@ -82,7 +83,7 @@ namespace GreenFlux.Application.Services
                 throw new Exception("Something went wrong trying to save group");
             }
 
-            return _groupModelMapper.Map(group);
+            return _groupDtoMapper.Map(group);
         }
 
         public void DeleteGroup(Guid groupId)
