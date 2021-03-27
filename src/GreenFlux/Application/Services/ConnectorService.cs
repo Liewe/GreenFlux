@@ -42,12 +42,13 @@ namespace GreenFlux.Application.Services
         public ConnectorDto GetConnector(Guid groupId, Guid chargeStationId, short connectorId)
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
-            var connectorDto = _connectorDtoMapper.Map(chargeStation, connectorId);
-            if (connectorDto == null)
+
+            if (chargeStation.GetMaxCapacityInAmps(connectorId) == null)
             {
                 throw new NotFoundException();
             }
-
+            
+            var connectorDto = _connectorDtoMapper.Map(chargeStation, connectorId);
             return connectorDto;
         }
 
