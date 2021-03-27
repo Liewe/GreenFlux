@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GreenFlux.Application.Models;
 
@@ -33,6 +34,11 @@ namespace GreenFlux.Application.Services
             where TItem : IValue
         {
             var sortedItems = items.OrderByDescending(c => c.Value).ToArray();
+            if (sortedItems.Any(s => s.Value <= 0))
+            {
+                throw new ArgumentException("Allitems should have a value greater than zero");
+            }
+            
             return FindSmallestSetsForRequiredSumRecursively(0, requiredSum);
 
             IEnumerable<List<TItem>> FindSmallestSetsForRequiredSumRecursively(int currentIndex, int recursiveRequiredSum)
