@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
-using GreenFlux.Application.Models;
 using GreenFlux.Application.Services;
-using GreenFlux.Application.WriteModels;
 using GreenFlux.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 
@@ -25,7 +24,7 @@ namespace GreenFlux.Controllers
         }
 
         [HttpGet(GroupsTemplate, Name = nameof(GetGroups))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Groups))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GroupsDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetGroups()
         {
@@ -33,10 +32,10 @@ namespace GreenFlux.Controllers
         }
 
         [HttpPost(GroupsTemplate, Name = nameof(CreateGroup))]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(GroupDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult CreateGroup(DtoGroup group)
+        public IActionResult CreateGroup(SaveGroupDto group)
         {
             if (!ModelState.IsValid)
             {
@@ -50,17 +49,17 @@ namespace GreenFlux.Controllers
             }
             catch (DomainException domainException)
             {
-                ModelState.AddModelError(domainException.Key, domainException.Message);
+                ModelState.AddModelError("", domainException.Message);
                 return BadRequest(ModelState);
             }
         }
 
         [HttpPut(GroupTemplate, Name = nameof(UpdateGroup))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GroupDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult UpdateGroup(Guid groupId, DtoGroup group)
+        public IActionResult UpdateGroup(Guid groupId, SaveGroupDto group)
         {
             if (!ModelState.IsValid)
             {
@@ -73,7 +72,7 @@ namespace GreenFlux.Controllers
             }
             catch (DomainException domainException)
             {
-                ModelState.AddModelError(domainException.Key, domainException.Message);
+                ModelState.AddModelError("", domainException.Message);
                 return BadRequest(ModelState);
             }
             catch (NotFoundException)
@@ -83,7 +82,7 @@ namespace GreenFlux.Controllers
         }
 
         [HttpGet(GroupTemplate, Name = nameof(GetGroup))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GroupDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetGroup(Guid groupId)

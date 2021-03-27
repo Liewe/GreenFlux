@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace GreenFlux.Application.Models
+namespace GreenFlux.Application.DtoModels
 {
-    public class Group : LinkedModel
+    public class GroupDto : LinkedDtoBase
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

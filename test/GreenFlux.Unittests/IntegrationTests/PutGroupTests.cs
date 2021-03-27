@@ -2,8 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GreenFlux.Application.Models;
-using GreenFlux.Application.WriteModels;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Unittests.Utilities;
 using Xunit;
 
@@ -29,14 +28,14 @@ namespace GreenFlux.Unittests.IntegrationTests
             
             _webApplicationFactory.TestDbUtilities.AddGroup(id, "Initial name", 10);
 
-            var group = new DtoGroup
+            var group = new SaveGroupDto
             {
                 Name = "Changed name",
                 CapacityInAmps = 20
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{id}", group);
+            var result = await httpClient.SendAsync<SaveGroupDto, GroupDto>(HttpMethod.Put, $"/groups/{id}", group);
             
             // assert
             Assert.Equal(HttpStatusCode.OK, result.Response.StatusCode);
@@ -55,14 +54,14 @@ namespace GreenFlux.Unittests.IntegrationTests
 
             _webApplicationFactory.TestDbUtilities.AddGroup(id, "Initial name", 10);
 
-            var group = new DtoGroup
+            var group = new SaveGroupDto
             {
                 Name = null,
                 CapacityInAmps = 0
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{id}", group);
+            var result = await httpClient.SendAsync<SaveGroupDto, GroupDto>(HttpMethod.Put, $"/groups/{id}", group);
 
             // assert
             Assert.Equal(HttpStatusCode.BadRequest, result.Response.StatusCode);
@@ -77,14 +76,14 @@ namespace GreenFlux.Unittests.IntegrationTests
 
             var id = Guid.NewGuid();
             
-            var group = new DtoGroup
+            var group = new SaveGroupDto
             {
                 Name = "Changed name",
                 CapacityInAmps = 20
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Put, $"/groups/{id}", group);
+            var result = await httpClient.SendAsync<SaveGroupDto, GroupDto>(HttpMethod.Put, $"/groups/{id}", group);
 
             // assert
             Assert.Equal(HttpStatusCode.NotFound, result.Response.StatusCode);

@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
-using GreenFlux.Application.Models;
 using GreenFlux.Application.Services;
-using GreenFlux.Application.WriteModels;
 using GreenFlux.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 
@@ -27,7 +26,7 @@ namespace GreenFlux.Controllers
         }
 
         [HttpGet(ConnectorsTemplate, Name = nameof(GetConnectors))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Connectors))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ConnectorsDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetConnectors(Guid groupId, Guid chargeStationId)
         {
@@ -35,11 +34,11 @@ namespace GreenFlux.Controllers
         }
 
         [HttpPost(ConnectorsTemplate, Name = nameof(CreateConnector))]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Connector))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ConnectorDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SuggestionsDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult CreateConnector(Guid groupId, Guid chargeStationId, DtoConnector connector)
+        public IActionResult CreateConnector(Guid groupId, Guid chargeStationId, SaveConnectorDto connector)
         {
             if (!ModelState.IsValid)
             {
@@ -57,18 +56,18 @@ namespace GreenFlux.Controllers
             }
             catch (DomainException domainException)
             {
-                ModelState.AddModelError(domainException.Key, domainException.Message);
+                ModelState.AddModelError("", domainException.Message);
                 return BadRequest(ModelState);
             }
         }
 
         [HttpPut(ConnectorTemplate, Name = nameof(UpdateConnector))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Connector))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ConnectorDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SuggestionsDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, DtoConnector connector)
+        public IActionResult UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, SaveConnectorDto connector)
         {
             if (!ModelState.IsValid)
             {
@@ -85,7 +84,7 @@ namespace GreenFlux.Controllers
             }
             catch (DomainException domainException)
             {
-                ModelState.AddModelError(domainException.Key, domainException.Message);
+                ModelState.AddModelError("", domainException.Message);
                 return BadRequest(ModelState);
             }
             catch (NotFoundException)
@@ -95,7 +94,7 @@ namespace GreenFlux.Controllers
         }
 
         [HttpGet(ConnectorTemplate, Name = nameof(GetConnector))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Connector))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ConnectorDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetConnector(Guid groupId, Guid chargeStationId, short connectorId)

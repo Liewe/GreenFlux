@@ -1,62 +1,57 @@
 ﻿using System;
 using System.Linq;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
-using GreenFlux.Application.Models;
-using GreenFlux.Application.WriteModels;
 using GreenFlux.Infrastructure;
-using ChargeStation = GreenFlux.Application.Models.ChargeStation;
+using ChargeStationDto = GreenFlux.Application.DtoModels.ChargeStationDto;
 
 namespace GreenFlux.Application.Services
 {
     public interface IChargeStationService
     {
-        ChargeStations GetChargeStations(Guid groupId);
-
-        ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId);
-
-        ChargeStation CreateChargeStation(Guid groupId, DtoChargeStation chargeStation);
-
-        ChargeStation UpdateChargeStation(Guid groupId, Guid chargeStationId, DtoChargeStation chargeStation);
-
+        ChargeStationsDto GetChargeStations(Guid groupId);
+        ChargeStationDto GetChargeStation(Guid groupId, Guid chargeStationId);
+        ChargeStationDto CreateChargeStation(Guid groupId, SaveChargeStationDto chargeStation);
+        ChargeStationDto UpdateChargeStation(Guid groupId, Guid chargeStationId, SaveChargeStationDto chargeStation);
         void DeleteChargeStation(Guid groupId, Guid chargeStationId);
     }
 
     public class ChargeStationService : IChargeStationService
     {
         private readonly IRepository _repository;
-        private readonly IChargeStationsModelMapper _chargeStationsModelMapper;
-        private readonly IChargeStationModelMapper _chargeStationModelMapper;
+        private readonly IChargeStationsDtoMapper _chargeStationsModelMapper;
+        private readonly IChargeStationDtoMapper _chargeStationModelMapper;
 
         public ChargeStationService(
             IRepository repository, 
-            IChargeStationsModelMapper chargeStationsModelMapper, 
-            IChargeStationModelMapper chargeStationModelMapper)
+            IChargeStationsDtoMapper chargeStationsModelMapper, 
+            IChargeStationDtoMapper chargeStationModelMapper)
         {
             _repository = repository;
             _chargeStationsModelMapper = chargeStationsModelMapper;
             _chargeStationModelMapper = chargeStationModelMapper;
         }
 
-        public ChargeStations GetChargeStations(Guid groupId)
+        public ChargeStationsDto GetChargeStations(Guid groupId)
         {
             var group = GetGroup(groupId);
             return _chargeStationsModelMapper.Map(group);
         }
         
-        public ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId)
+        public ChargeStationDto GetChargeStation(Guid groupId, Guid chargeStationId)
         {
             var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
             return _chargeStationModelMapper.Map(chargeStation);
         }
 
-        public ChargeStation CreateChargeStation(Guid groupId, DtoChargeStation chargeStationDto)
+        public ChargeStationDto CreateChargeStation(Guid groupId, SaveChargeStationDto chargeStationDto)
         {
             var group = GetGroup(groupId);
 
-            var chargeStation = new Domain.Models.ChargeStation(group, Guid.NewGuid(), chargeStationDto.Name);
+            var connectionCapacities = chargeStationDto.Connectors.Select(c => c.MaxCurrentInAmps);
+            var chargeStation = new Domain.Models.ChargeStation(group, Guid.NewGuid(), chargeStationDto.Name, connectionCapacities);
             group.AddChargeStation(chargeStation);
-            chargeStation.SetAllMaxCapacityInAmps(chargeStation.Connectors.Select(c => c.MaxCurrentInAmps));
 
             if (!_repository.SaveChargeStation(chargeStation))
             {
@@ -66,12 +61,12 @@ namespace GreenFlux.Application.Services
             return _chargeStationModelMapper.Map(chargeStation);
         }
 
-        public ChargeStation UpdateChargeStation(Guid groupId, Guid chargeStationId, DtoChargeStation chargeStationDto)
+        public ChargeStationDto UpdateChargeStation(Guid groupId, Guid chargeStationId, SaveChargeStationDto chargeStationDto)
         {
             var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
 
             chargeStation.Name = chargeStationDto.Name;
-            chargeStation.SetAllMaxCapacityInAmps(chargeStationDto.Connectors.Select(c => c.MaxCurrentInAmps));
+            chargeStation.SetAllConnectorCapacities(chargeStationDto.Connectors.Select(c => c.MaxCurrentInAmps));
             
             if (!_repository.SaveChargeStation(chargeStation))
             {
@@ -83,15 +78,13 @@ namespace GreenFlux.Application.Services
         
         public void DeleteChargeStation(Guid groupId, Guid chargeStationId)
         {
-            var chargeStation = GetChargeStationDomainModel(groupId, chargeStationId);
+            var group = GetGroup(groupId);
 
-            if (chargeStation == null)
+            if (!group.RemoveChargeStation(chargeStationId))
             {
                 throw new NotFoundException();
             }
-
-            chargeStation.Group.RemoveChargeStation(chargeStation);
-
+            
             if (!_repository.DeleteChargeStation(chargeStationId))
             {
                 throw new Exception("Something went wrong trying to save group");

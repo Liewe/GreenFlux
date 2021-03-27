@@ -1,8 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GreenFlux.Application.Models;
-using GreenFlux.Application.WriteModels;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Unittests.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -25,14 +24,14 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var postGroup = new DtoGroup
+            var postGroup = new SaveGroupDto
             {
                 Name = "Post Group",
                 CapacityInAmps = 20
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, Group>(HttpMethod.Post, "/groups", postGroup);
+            var result = await httpClient.SendAsync<SaveGroupDto, GroupDto>(HttpMethod.Post, "/groups", postGroup);
 
             // assert
             Assert.Equal(HttpStatusCode.Created, result.Response.StatusCode);
@@ -47,14 +46,14 @@ namespace GreenFlux.Unittests.IntegrationTests
             var httpClient = _webApplicationFactory.CreateClient();
             _webApplicationFactory.TestDbUtilities.DeleteAll();
 
-            var group = new DtoGroup
+            var group = new SaveGroupDto
             {
                 Name = null,
                 CapacityInAmps = 0
             };
 
             // act
-            var result = await httpClient.SendAsync<DtoGroup, SerializableError>(HttpMethod.Post, "/groups", group);
+            var result = await httpClient.SendAsync<SaveGroupDto, SerializableError>(HttpMethod.Post, "/groups", group);
 
             // assert
             Assert.Equal(HttpStatusCode.BadRequest, result.Response.StatusCode);

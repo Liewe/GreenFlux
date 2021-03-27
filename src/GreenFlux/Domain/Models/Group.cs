@@ -7,7 +7,7 @@ namespace GreenFlux.Domain.Models
 {
     public class Group
     {
-        private readonly List<ChargeStation> _chargeStations = new List<ChargeStation>();
+        private readonly Dictionary<Guid, ChargeStation> _chargeStations = new Dictionary<Guid, ChargeStation>();
         private string _name;
         private int _capacityInAmps;
 
@@ -27,9 +27,7 @@ namespace GreenFlux.Domain.Models
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    throw new DomainException(
-                        nameof(Name), 
-                        $"The value of {nameof(Name)} is not allowed be null or empty");
+                    throw new DomainException($"The value of {nameof(Name)} is not allowed be null or empty");
                 }
                 _name = value;
             }
@@ -42,18 +40,14 @@ namespace GreenFlux.Domain.Models
             {
                 if (value == 0)
                 {
-                    throw new DomainException(
-                        nameof(CapacityInAmps), 
-                        $"The value of {nameof(CapacityInAmps)} is not allowed to be 0");
+                    throw new DomainException($"The value of {nameof(CapacityInAmps)} is not allowed to be 0");
                 }
 
                 var usedCapacity = GetUsedCapacity();
 
                 if (value < usedCapacity)
                 {
-                    throw new DomainException(
-                        nameof(CapacityInAmps), 
-                        $"Cannot set capacity to {value} the sum of the capacity of the connectors is {usedCapacity}");
+                    throw new DomainException($"Cannot set capacity to {value} the sum of the capacity of the connectors is {usedCapacity}");
                 }
 
                 _capacityInAmps = value;
@@ -64,16 +58,16 @@ namespace GreenFlux.Domain.Models
 
         public int GetAvailableCapacity() => CapacityInAmps - GetUsedCapacity();
 
-        public IEnumerable<ChargeStation> ChargeStations { get => _chargeStations; } 
+        public IEnumerable<ChargeStation> ChargeStations { get => _chargeStations.Values; } 
         
         public void AddChargeStation(ChargeStation chargeStation)
         {
-            _chargeStations.Add(chargeStation);
+            _chargeStations.Add(chargeStation.Id, chargeStation);
         }
 
-        public bool RemoveChargeStation(ChargeStation chargeStationToDelete)
+        public bool RemoveChargeStation(Guid chargeStationId)
         {
-            return _chargeStations.Remove(chargeStationToDelete);
+            return _chargeStations.Remove(chargeStationId);
         }
     }
 }

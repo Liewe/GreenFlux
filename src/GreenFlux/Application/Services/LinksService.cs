@@ -14,9 +14,8 @@ namespace GreenFlux.Application.Services
         string LinkToChargeStation(ChargeStation chargeStation);
         string LinkToChargeStation(Guid groupId, Guid id);
         string LinkToChargeStations(Guid groupId);
-        string LinkToConnectors(Connector connector);
         string LinkToConnectors(ChargeStation chargeStation);
-        string LinkToConnector(Connector connector);
+        string LinkToConnector(ChargeStation chargeStation, short connectorId);
         string LinkToConnector(Guid groupId, Guid chargeStationId, short id);
     }
 
@@ -43,10 +42,7 @@ namespace GreenFlux.Application.Services
         
         public string LinkToChargeStation(Guid groupId, Guid chargeStationId) =>
             _urlHelper.Link(nameof(ChargeStationController.GetChargeStation), new { groupId, chargeStationId });
-
-        public string LinkToConnectors(Connector connector) =>
-            LinkToConnectors(connector.ChargeStation);
-
+        
         public string LinkToConnectors(ChargeStation chargeStation) => LinkToConnectors(
             chargeStation.Group.Id,
             chargeStation.Id);
@@ -54,10 +50,10 @@ namespace GreenFlux.Application.Services
         public string LinkToConnectors(Guid groupId, Guid chargeStationId) =>
             _urlHelper.Link(nameof(ConnectorController.GetConnectors), new { groupId, chargeStationId });
 
-        public string LinkToConnector(Connector connector) => LinkToConnector(
-            connector.ChargeStation.Group.Id,
-            connector.ChargeStation.Id, 
-            connector.Id);
+        public string LinkToConnector(ChargeStation chargeStation, short connectorId) => LinkToConnector(
+            chargeStation.Group.Id,
+            chargeStation.Id,
+            connectorId);
 
         public string LinkToConnector(Guid groupId, Guid chargeStationId, short connectorId) =>
             _urlHelper.Link(nameof(ConnectorController.GetConnector), new { groupId, chargeStationId, connectorId });

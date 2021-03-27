@@ -2,7 +2,7 @@
 {
     public class NotEnoughCapacityException : DomainException
     {
-        public NotEnoughCapacityException(string key, string message, int capacityNeeded) : base(key, message)
+        public NotEnoughCapacityException(string message, int capacityNeeded) : base(message)
         {
             CapacityNeeded = capacityNeeded;
         }

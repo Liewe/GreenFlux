@@ -1,8 +1,8 @@
-﻿namespace GreenFlux.Application.Models
+﻿namespace GreenFlux.Application.DtoModels
 {
-    public class Link
+    public class LinkDto
     {
-        public Link(string rel, string href, string action)
+        public LinkDto(string rel, string href, string action)
         {
             Rel = rel;
             Href = href;

@@ -97,12 +97,12 @@ namespace GreenFlux.Infrastructure
                 Name = chargeStationDomainModel.Name
             };
 
-            var dbConnectors = chargeStationDomainModel.Connectors.Select(c => new Models.Connector
+            var dbConnectors = chargeStationDomainModel.ConnectorCapacities.Select(c => new Models.Connector
             {
-                Id = c.Id,
-                ChargeStationId = c.ChargeStation.Id.ToString(),
-                GroupId = c.ChargeStation.Group.Id.ToString(),
-                MaxCurrentInAmps = c.MaxCurrentInAmps
+                Id = c.id,
+                ChargeStationId = chargeStationDomainModel.Id.ToString(),
+                GroupId = chargeStationDomainModel.Group.Id.ToString(),
+                MaxCurrentInAmps = c.maxCurrentInAmps
             });
 
             return 0 < _chargeStationDbContext.Save(dbChargeStation)
@@ -162,22 +162,10 @@ namespace GreenFlux.Infrastructure
             foreach (var chargeStation in chargeStations)
             {
                 connectorsDic.TryGetValue(chargeStation.Id, out var chargeStationConnectors);
-                var chargeStationDomainModel = new ChargeStation(groupDomainModel, Guid.Parse(chargeStation.Id), chargeStation.Name);
+
+                var connectionCapacities = chargeStationConnectors.ToDictionary(c => c.Id, c => c.MaxCurrentInAmps);
+                var chargeStationDomainModel = new ChargeStation(groupDomainModel, Guid.Parse(chargeStation.Id), chargeStation.Name, connectionCapacities);
                 groupDomainModel.AddChargeStation(chargeStationDomainModel);
-                AddConnectors(chargeStationDomainModel, chargeStationConnectors);
-            }
-        }
-
-        private void AddConnectors(ChargeStation chargeStationDomainModel, IEnumerable<Models.Connector> connectors)
-        {
-            if (connectors == null) return;
-
-            foreach (var connector in connectors)
-            {
-                chargeStationDomainModel.AddConnector(new Connector(chargeStationDomainModel, connector.Id)
-                {
-                    MaxCurrentInAmps = connector.MaxCurrentInAmps
-                });
             }
         }
     }

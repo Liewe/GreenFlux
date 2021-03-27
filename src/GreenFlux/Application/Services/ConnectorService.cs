@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
-using GreenFlux.Application.Models;
-using GreenFlux.Application.WriteModels;
 using GreenFlux.Domain.Exceptions;
 using GreenFlux.Infrastructure;
 
@@ -11,119 +10,95 @@ namespace GreenFlux.Application.Services
 {
     public interface IConnectorService
     {
-        Connectors GetConnectors(Guid groupId, Guid chargeStationId);
-
-        Connector GetConnector(Guid groupId, Guid chargeStationId, short connectorId);
-
-        Connector CreateConnector(Guid groupId, Guid chargeStationId, DtoConnector connector);
-
-        Connector UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, DtoConnector connector);
-
+        ConnectorsDto GetConnectors(Guid groupId, Guid chargeStationId);
+        ConnectorDto GetConnector(Guid groupId, Guid chargeStationId, short connectorId);
+        ConnectorDto CreateConnector(Guid groupId, Guid chargeStationId, SaveConnectorDto connector);
+        ConnectorDto UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, SaveConnectorDto connector);
         void DeleteConnector(Guid groupId, Guid chargeStationId, short connectorId);
     }
 
     public class ConnectorService : IConnectorService
     {
         private readonly IRepository _repository;
-        private readonly IConnectorsModelMapper _connectorsModelMapper;
-        private readonly IConnectorModelMapper _connectorModelMapper;
+        private readonly IConnectorsDtoMapper _connectorsModelMapper;
+        private readonly IConnectorDtoMapper _connectorModelMapper;
 
         public ConnectorService(
             IRepository repository, 
-            IConnectorsModelMapper connectorsModelMapper, 
-            IConnectorModelMapper connectorModelMapper)
+            IConnectorsDtoMapper connectorsModelMapper, 
+            IConnectorDtoMapper connectorModelMapper)
         {
             _repository = repository;
             _connectorsModelMapper = connectorsModelMapper;
             _connectorModelMapper = connectorModelMapper;
         }
 
-        public Connectors GetConnectors(Guid groupId, Guid chargeStationId)
+        public ConnectorsDto GetConnectors(Guid groupId, Guid chargeStationId)
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
             return _connectorsModelMapper.Map(chargeStation);
         }
         
-        public Connector GetConnector(Guid groupId, Guid chargeStationId, short connectorId)
+        public ConnectorDto GetConnector(Guid groupId, Guid chargeStationId, short connectorId)
         {
-            var connector = GetConnectorDomainModel(groupId, chargeStationId, connectorId);
-            return _connectorModelMapper.Map(connector);
+            var chargeStation = GetChargeStation(groupId, chargeStationId);
+            var result = _connectorModelMapper.Map(chargeStation, connectorId);
+            if (result == null)
+            {
+                throw new NotFoundException();
+            }
+
+            return result;
         }
 
-        public Connector CreateConnector(Guid groupId, Guid chargeStationId, DtoConnector connectorDto)
+        public ConnectorDto CreateConnector(Guid groupId, Guid chargeStationId, SaveConnectorDto connectorDto)
         {
             var chargeStation = GetChargeStation(groupId, chargeStationId);
 
-            var nextAvailableId = chargeStation.GetNextAvailableConnectorId();
-
-            if (nextAvailableId == null)
-            {
-                throw new DomainException(nameof(Connectors), "No valid id available within the charge station");
-            }
-
-            var connector = new Domain.Models.Connector(chargeStation, nextAvailableId.Value)
-            {
-                MaxCurrentInAmps = connectorDto.MaxCurrentInAmps
-            };
-
-            chargeStation.AddConnector(connector);
+            var connectorId = chargeStation.AddConnector(connectorDto.MaxCurrentInAmps);
 
             if (!_repository.SaveChargeStation(chargeStation))
             {
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _connectorModelMapper.Map(connector);
+            return _connectorModelMapper.Map(chargeStation, connectorId);
         }
 
-        public Connector UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, DtoConnector connectorDto)
+        public ConnectorDto UpdateConnector(Guid groupId, Guid chargeStationId, short connectorId, SaveConnectorDto connectorDto)
         {
-            var connector = GetConnectorDomainModel(groupId, chargeStationId, connectorId);
+            var chargeStation = GetChargeStation(groupId, chargeStationId);
 
-            connector.MaxCurrentInAmps = connectorDto.MaxCurrentInAmps;
+            if (chargeStation.GetMaxCapacityInAmps(connectorId) == null)
+            {
+                throw new NotFoundException();
+            }
 
-            if (!_repository.SaveChargeStation(connector.ChargeStation))
+            chargeStation.SetConnectorCapacity(connectorId, connectorDto.MaxCurrentInAmps);
+            
+            if (!_repository.SaveChargeStation(chargeStation))
             {
                 throw new Exception("Something went wrong trying to save the charge station");
             }
 
-            return _connectorModelMapper.Map(connector);
+            return _connectorModelMapper.Map(chargeStation, connectorId);
         }
 
         public void DeleteConnector(Guid groupId, Guid chargeStationId, short connectorId)
         {
-            var connector = GetConnectorDomainModel(groupId, chargeStationId, connectorId);
-
-            if (connector == null)
+            var chargeStation = GetChargeStation(groupId, chargeStationId);
+            
+            if (!chargeStation.RemoveConnector(connectorId))
             {
                 throw new NotFoundException();
             }
 
-            if (!_repository.SaveChargeStation(connector.ChargeStation))
+            if (!_repository.SaveChargeStation(chargeStation))
             {
                 throw new Exception("Something went wrong trying to save the charge station");
             }
         }
-
-        private Domain.Models.Connector GetConnectorDomainModel(
-            Guid groupId, 
-            Guid chargeStationId,
-            short connectorId)
-        {
-            var chargeStation = GetChargeStation(groupId, chargeStationId);
-
-            var connector = chargeStation
-                .Connectors
-                .FirstOrDefault(c => c.Id == connectorId);
-
-            if (connector == null)
-            {
-                throw new NotFoundException();
-            }
-
-            return connector;
-        }
-
+        
         private Domain.Models.ChargeStation GetChargeStation(Guid groupId, Guid chargeStationId)
         {
             var group = GetGroup(groupId);

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GreenFlux.Application.Models;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Unittests.Utilities;
 using Xunit;
 
@@ -32,7 +32,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             _webApplicationFactory.TestDbUtilities.AddGroup(id, name, capacityInAmps);
 
             //act
-            var result = await httpClient.SendAsync<Group>(HttpMethod.Get, $"/groups/{id}");
+            var result = await httpClient.SendAsync<GroupDto>(HttpMethod.Get, $"/groups/{id}");
 
             //assert
             Assert.Equal(HttpStatusCode.OK, result.Response.StatusCode);
@@ -50,7 +50,7 @@ namespace GreenFlux.Unittests.IntegrationTests
             var id = Guid.NewGuid();
 
             //act
-            var result = await httpClient.SendAsync<Group>(HttpMethod.Get, $"/groups/{id}");
+            var result = await httpClient.SendAsync<GroupDto>(HttpMethod.Get, $"/groups/{id}");
 
             //assert
             Assert.Equal(HttpStatusCode.NotFound, result.Response.StatusCode);
@@ -71,11 +71,11 @@ namespace GreenFlux.Unittests.IntegrationTests
             testData.ForEach(d => _webApplicationFactory.TestDbUtilities.AddGroup(d.Id, d.Name, d.CapacityInAmps));
 
             //act
-            var result = await httpClient.SendAsync<Groups>(HttpMethod.Get, "/groups");
+            var result = await httpClient.SendAsync<GroupsDto>(HttpMethod.Get, "/groups");
 
             //assert
             Assert.Equal(HttpStatusCode.OK, result.Response.StatusCode);
-            Assert.Collection(result.Content.Values, testData.Select(testDataItem => new Action<Group>(group =>
+            Assert.Collection(result.Content.Values, testData.Select(testDataItem => new Action<GroupDto>(group =>
             {
                 Assert.Equal(testDataItem.Id, group.Id);
                 Assert.Equal(testDataItem.Name, group.Name);

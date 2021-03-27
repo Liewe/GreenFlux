@@ -34,14 +34,14 @@ namespace GreenFlux
 
             services.AddTransient<ILinksService, LinksService>();
 
-            services.AddTransient<IGroupsModelMapper, GroupsModelMapper>();
-            services.AddTransient<IGroupModelMapper, GroupModelMapper>();
-            services.AddTransient<IChargeStationsModelMapper, ChargeStationsModelMapper>();
-            services.AddTransient<IChargeStationModelMapper, ChargeStationModelMapper>();
-            services.AddTransient<IConnectorsModelMapper, ConnectorsModelMapper>();
-            services.AddTransient<IConnectorModelMapper, ConnectorModelMapper>();
-            services.AddTransient<ISuggestionsModelMapper, SuggestionsModelMapper>();
-            services.AddTransient<ISuggestionModelMapper, SuggestionModelMapper>();
+            services.AddTransient<IGroupsDtoMapper, GroupsDtoMapper>();
+            services.AddTransient<IGroupDtoMapper, GroupDtoMapper>();
+            services.AddTransient<IChargeStationsDtoMapper, ChargeStationsDtoMapper>();
+            services.AddTransient<IChargeStationDtoMapper, ChargeStationDtoMapper>();
+            services.AddTransient<IConnectorsDtoMapper, ConnectorsDtoMapper>();
+            services.AddTransient<IConnectorDtoMapper, ConnectorDtoMapper>();
+            services.AddTransient<ISuggestionsDtoMapper, SuggestionsDtoMapper>();
+            services.AddTransient<ISuggestionDtoMapper, SuggestionDtoMapper>();
 
             services.AddSingleton<IRepository, Repository>();
 

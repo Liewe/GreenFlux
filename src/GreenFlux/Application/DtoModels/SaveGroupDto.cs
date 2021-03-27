@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GreenFlux.Application.WriteModels
+namespace GreenFlux.Application.DtoModels
 {
-    public class DtoGroup
+    public class SaveGroupDto
     {
         [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; }

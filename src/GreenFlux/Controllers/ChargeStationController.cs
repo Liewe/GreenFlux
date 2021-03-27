@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
-using GreenFlux.Application.Models;
 using GreenFlux.Application.Services;
-using GreenFlux.Application.WriteModels;
 using GreenFlux.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 
@@ -27,7 +26,7 @@ namespace GreenFlux.Controllers
         }
 
         [HttpGet(ChargeStationsTemplate, Name = nameof(GetChargeStations))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStations))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStationsDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetChargeStations(Guid groupId)
         {
@@ -35,11 +34,11 @@ namespace GreenFlux.Controllers
         }
 
         [HttpPost(ChargeStationsTemplate, Name = nameof(CreateChargeStation))]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ChargeStation))]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ChargeStationDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SuggestionsDto))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult CreateChargeStation(Guid groupId, DtoChargeStation chargeStation)
+        public IActionResult CreateChargeStation(Guid groupId, SaveChargeStationDto chargeStation)
         {
             if (!ModelState.IsValid)
             {
@@ -57,18 +56,18 @@ namespace GreenFlux.Controllers
             }
             catch (DomainException domainException)
             {
-                ModelState.AddModelError(domainException.Key, domainException.Message);
+                ModelState.AddModelError("", domainException.Message);
                 return BadRequest(ModelState);
             }
         }
 
         [HttpPut(ChargeStationTemplate, Name = nameof(UpdateChargeStation))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStation))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStationDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SerializableError))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Suggestions))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(SuggestionsDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult UpdateChargeStation(Guid groupId, Guid chargeStationId, DtoChargeStation chargeStation)
+        public IActionResult UpdateChargeStation(Guid groupId, Guid chargeStationId, SaveChargeStationDto chargeStation)
         {
             if (!ModelState.IsValid)
             {
@@ -85,7 +84,7 @@ namespace GreenFlux.Controllers
             }
             catch (DomainException domainException)
             {
-                ModelState.AddModelError(domainException.Key, domainException.Message);
+                ModelState.AddModelError("", domainException.Message);
                 return BadRequest(ModelState);
             }
             catch (NotFoundException)
@@ -95,7 +94,7 @@ namespace GreenFlux.Controllers
         }
 
         [HttpGet(ChargeStationTemplate, Name = nameof(GetChargeStation))]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStation))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChargeStationDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult GetChargeStation(Guid groupId, Guid chargeStationId)

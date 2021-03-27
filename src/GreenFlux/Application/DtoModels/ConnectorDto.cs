@@ -1,6 +1,6 @@
-﻿namespace GreenFlux.Application.Models
+﻿namespace GreenFlux.Application.DtoModels
 {
-    public class Connector : LinkedModel
+    public class ConnectorDto : LinkedDtoBase
     {
         public short Id { get; set; }
 

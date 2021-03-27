@@ -1,21 +1,20 @@
 ﻿using System;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Exceptions;
 using GreenFlux.Application.Mappers;
-using GreenFlux.Application.Models;
-using GreenFlux.Application.WriteModels;
 using GreenFlux.Infrastructure;
 
 namespace GreenFlux.Application.Services
 {
     public interface IGroupService
     {
-        Groups GetGroups();
+        GroupsDto GetGroups();
 
-        Group GetGroup(Guid groupId);
+        GroupDto GetGroup(Guid groupId);
 
-        Group CreateGroup(DtoGroup group);
+        GroupDto CreateGroup(SaveGroupDto group);
 
-        Group UpdateGroup(Guid groupId, DtoGroup group);
+        GroupDto UpdateGroup(Guid groupId, SaveGroupDto group);
 
         void DeleteGroup(Guid groupId);
     }
@@ -23,26 +22,26 @@ namespace GreenFlux.Application.Services
     public class GroupService : IGroupService
     {
         private readonly IRepository _repository;
-        private readonly IGroupsModelMapper _groupsModelMapper;
-        private readonly IGroupModelMapper _groupModelMapper;
+        private readonly IGroupsDtoMapper _groupsModelMapper;
+        private readonly IGroupDtoMapper _groupModelMapper;
 
         public GroupService(
             IRepository repository, 
-            IGroupsModelMapper groupsModelMapper, 
-            IGroupModelMapper groupModelMapper)
+            IGroupsDtoMapper groupsModelMapper, 
+            IGroupDtoMapper groupModelMapper)
         {
             _repository = repository;
             _groupsModelMapper = groupsModelMapper;
             _groupModelMapper = groupModelMapper;
         }
 
-        public Groups GetGroups()
+        public GroupsDto GetGroups()
         {
             var groupsDomainModel = _repository.GetGroups();
             return _groupsModelMapper.Map(groupsDomainModel);
         }
 
-        public Group GetGroup(Guid groupId)
+        public GroupDto GetGroup(Guid groupId)
         {
             var group = _repository.GetGroup(groupId);
             
@@ -54,7 +53,7 @@ namespace GreenFlux.Application.Services
             return _groupModelMapper.Map(group);
         }
 
-        public Group CreateGroup(DtoGroup groupDto)
+        public GroupDto CreateGroup(SaveGroupDto groupDto)
         {
             var group = new Domain.Models.Group(Guid.NewGuid(), groupDto.Name, groupDto.CapacityInAmps);
 
@@ -66,7 +65,7 @@ namespace GreenFlux.Application.Services
             return _groupModelMapper.Map(group);
         }
 
-        public Group UpdateGroup(Guid groupId, DtoGroup groupDto)
+        public GroupDto UpdateGroup(Guid groupId, SaveGroupDto groupDto)
         {
             var group = _repository.GetGroup(groupId);
 

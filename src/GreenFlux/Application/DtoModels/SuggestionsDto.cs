@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace GreenFlux.Application.Models
+namespace GreenFlux.Application.DtoModels
 {
-    public class Suggestions
+    public class SuggestionsDto
     {
         public string ErrorMessage { get; set; }
 
@@ -10,6 +10,6 @@ namespace GreenFlux.Application.Models
 
         public bool SuggestionsAreExact { get; set; }
 
-        public IEnumerable<Suggestion> Suggestion { get; set; }
+        public IEnumerable<SuggestionDto> Suggestion { get; set; }
     }
 }

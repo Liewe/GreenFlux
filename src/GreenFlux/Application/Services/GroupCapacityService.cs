@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GreenFlux.Application.DtoModels;
 using GreenFlux.Application.Mappers;
 using GreenFlux.Application.Models;
 using GreenFlux.Infrastructure;
-using Connector = GreenFlux.Domain.Models.Connector;
+using ChargeStation = GreenFlux.Domain.Models.ChargeStation;
 using Group = GreenFlux.Domain.Models.Group;
 
 namespace GreenFlux.Application.Services
 {
     public interface IGroupCapacityService
     {
-        Suggestions GetSuggestions(Guid groupId, int capacityNeeded, int maxResults);
+        SuggestionsDto GetSuggestions(Guid groupId, int capacityNeeded, int maxResults);
     }
 
     public class GroupCapacityService : IGroupCapacityService
     {
-        private readonly ISuggestionsModelMapper _suggestionsModelMapper;
+        private readonly ISuggestionsDtoMapper _suggestionsModelMapper;
         private readonly IRepository _repository;
 
-        public GroupCapacityService(ISuggestionsModelMapper suggestionsModelMapper, IRepository repository)
+        public GroupCapacityService(ISuggestionsDtoMapper suggestionsModelMapper, IRepository repository)
         {
             _suggestionsModelMapper = suggestionsModelMapper;
             _repository = repository;
         }
 
-        public Suggestions GetSuggestions(Guid groupId, int capacityNeeded, int maxResults)
+        public SuggestionsDto GetSuggestions(Guid groupId, int capacityNeeded, int maxResults)
         {
             var group = _repository.GetGroup(groupId);
 
@@ -40,13 +41,13 @@ namespace GreenFlux.Application.Services
             return _suggestionsModelMapper.Map(connectorSets, capacityNeeded, false);
         }
 
-        private IEnumerable<IEnumerable<Connector>> FindConnectorsToFreeCapacity(Group group, int capacityNeeded, int maxResults, bool exact)
+        private IEnumerable<IEnumerable<ConnectorWrapper>> FindConnectorsToFreeCapacity(Group group, int capacityNeeded, int maxResults, bool exact)
         {
             int? smallestCount = null;
 
             var connectors = group
                 .ChargeStations
-                .SelectMany(c => c.Connectors);
+                .SelectMany(c => c.ConnectorCapacities.Select(co => new ConnectorWrapper(c, co.id, co.maxCurrentInAmps)));
 
             return FindConnectorsToFreeCapacity(connectors, capacityNeeded, exact)
                 .TakeWhile(c => c.Count == (smallestCount ??= c.Count))
@@ -62,7 +63,7 @@ namespace GreenFlux.Application.Services
         /// <param name="connectors">All connectors to consider</param>
         /// <param name="capacityNeeded">The sum of MaxCurrentInAmps's we seek</param>
         /// <param name="exact">When true, only sets which exactly match capacityNeeded are returned.</param>
-        private IEnumerable<List<Connector>> FindConnectorsToFreeCapacity(IEnumerable<Connector> connectors, int capacityNeeded, bool exact)
+        private IEnumerable<List<ConnectorWrapper>> FindConnectorsToFreeCapacity(IEnumerable<ConnectorWrapper> connectors, int capacityNeeded, bool exact)
         {
             // all connectors ordered from most capacity to least
             var sortedConnectors = connectors.OrderByDescending(c => c.MaxCurrentInAmps).ToArray();
@@ -71,7 +72,7 @@ namespace GreenFlux.Application.Services
             return FindCapacityRecursively(0, capacityNeeded);
 
             // returns all sets of connectors recursively that sum to at least 'recursiveCapacityNeeded'
-            IEnumerable<List<Connector>> FindCapacityRecursively(int currentIndex, int recursiveCapacityNeeded)
+            IEnumerable<List<ConnectorWrapper>> FindCapacityRecursively(int currentIndex, int recursiveCapacityNeeded)
             {
                 Queue<BatchSetIterator> queue = new Queue<BatchSetIterator>();
                 int? biggestSetCount = null;
@@ -84,7 +85,7 @@ namespace GreenFlux.Application.Services
                     {
                         if (recursiveCapacityNeeded == currentConnector.MaxCurrentInAmps || !exact)
                         {
-                            yield return new List<Connector> { currentConnector };
+                            yield return new List<ConnectorWrapper> { currentConnector };
                         }
                     }
                     else
@@ -131,10 +132,10 @@ namespace GreenFlux.Application.Services
 
         private class BatchSetIterator
         {
-            private readonly Connector _connector;
-            private readonly IEnumerator<List<Connector>> _enumerator;
+            private readonly ConnectorWrapper _connector;
+            private readonly IEnumerator<List<ConnectorWrapper>> _enumerator;
             
-            public BatchSetIterator(Connector connector, IEnumerable<List<Connector>> enumerable)
+            public BatchSetIterator(ConnectorWrapper connector, IEnumerable<List<ConnectorWrapper>> enumerable)
             {
                 _connector = connector;
                 _enumerator = enumerable.GetEnumerator();
@@ -147,7 +148,7 @@ namespace GreenFlux.Application.Services
        
             public bool ContainsMoreItems { get; private set; }
             
-            public IEnumerable<List<Connector>> GetNextBatchOfSets(int currentSetSize)
+            public IEnumerable<List<ConnectorWrapper>> GetNextBatchOfSets(int currentSetSize)
             {
                 if (!ContainsMoreItems)
                 {
